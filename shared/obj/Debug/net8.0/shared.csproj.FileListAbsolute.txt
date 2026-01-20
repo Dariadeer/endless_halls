@@ -1,0 +1,11 @@
+/Users/julibut/Documents/endless_halls/shared/bin/Debug/net8.0/shared.deps.json
+/Users/julibut/Documents/endless_halls/shared/bin/Debug/net8.0/shared.dll
+/Users/julibut/Documents/endless_halls/shared/bin/Debug/net8.0/shared.pdb
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.GeneratedMSBuildEditorConfig.editorconfig
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.AssemblyInfoInputs.cache
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.AssemblyInfo.cs
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.csproj.CoreCompileInputs.cache
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.dll
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/refint/shared.dll
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/shared.pdb
+/Users/julibut/Documents/endless_halls/shared/obj/Debug/net8.0/ref/shared.dll

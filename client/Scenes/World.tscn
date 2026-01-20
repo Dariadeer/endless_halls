@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://dewuujy0vl83h"]
+
+[ext_resource type="Script" uid="uid://breg2dkml4kqv" path="res://Scripts/WorldView.cs" id="1_j0p05"]
+[ext_resource type="Script" uid="uid://db827q03ev6oj" path="res://Scripts/Camera.cs" id="2_5nsto"]
+[ext_resource type="Script" uid="uid://nx18dn6epiw1" path="res://Scripts/GridView.cs" id="2_gjpho"]
+
+[node name="World" type="Node2D" node_paths=PackedStringArray("GridView")]
+script = ExtResource("1_j0p05")
+GridView = NodePath("Grid")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_5nsto")
+MoveSpeed = 200.0
+ZoomSpeed = 0.15
+ZoomTransitionSpeed = 10.0
+MagnifyZoomSpeed = 10.0
+
+[node name="Grid" type="Node2D" parent="."]
+script = ExtResource("2_gjpho")
