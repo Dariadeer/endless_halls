@@ -1,0 +1,46 @@
+{
+    "code-runner.runInTerminal": false,
+    "code-runner.clearPreviousOutput": true,
+    "code-runner.showExecutionMessage": false,
+    "dotnet.defaultSolution": "endless_halls.slnx",
+    "files.exclude": {
+        /** Godot project folders */
+        "*/Assets": true,
+        "*/Scenes": true,
+        /** Godot resource files */
+        "**/*.tscn": true,
+        "**/*.scn": true,
+        "**/*.tres": true,
+        "**/*.res": true,
+        "**/*.import": true,
+        /** Godot internal folders */
+        "**/.godot/": true,
+        "**/*.uid": true,
+        "**/*.godot": true,
+        "**/*.editorconfig": true,
+        "**/*.cfg": true,
+        /** Common asset formats */
+        "**/*.png": true,
+        "**/*.svg": true,
+        "**/*.jpg": true,
+        "**/*.jpeg": true,
+        "**/*.webp": true,
+        "**/*.ogg": true,
+        "**/*.wav": true,
+        "**/*.mp3": true,
+        "**/*.ttf": true,
+        "**/*.otf": true,
+        /** Other folders **/
+        "*/bin": true,
+        "*/obj": true,
+        /** Git **/
+        "*/*.git*": true,
+    },
+    "search.exclude": {
+        "**/*.tscn": true,
+        "**/*.tres": true,
+        "**/*.import": true,
+        "**/.godot/": true
+    },
+    "terminal.integrated.suggest.enabled": true
+}

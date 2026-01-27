@@ -1,5 +1,6 @@
 <Solution>
-  <Project Path="server/server.csproj" />
-  <Project Path="shared/shared.csproj" />
-  <Project Path="client/client.csproj" />
+  <Project Path="Server/Server.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+  <Project Path="Client/Client.csproj" />
+  <Project Path="Tests/Tests.csproj" />
 </Solution>
