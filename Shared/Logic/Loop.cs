@@ -2,6 +2,7 @@ namespace Shared.Logic;
 
 using Shared.Data;
 using Shared.Data.Commands;
+using Shared.Network;
 using Shared.Utils;
 
 public class Loop
@@ -16,7 +17,9 @@ public class Loop
 	public ILogger? Logger;
     private World _world;
     public int Tick;
+    public int FurthestTickProcessed = 0;
     private readonly Dictionary<int, CommandList> _commands = [];
+    private int _lastCommandTick = 0;
     private readonly Dictionary<int, World> snapshots = [];
 
     public Loop(World world)
@@ -53,19 +56,16 @@ public class Loop
     {
         Update(Tick);
 
+        if(Tick > FurthestTickProcessed)
+        {
+            FurthestTickProcessed = Tick;
+        }
+
         Tick++;
     }
 
     public void AdvanceWorld(int tick)
-    {
-        if (_commands.ContainsKey(tick))
-        {
-            foreach(var command in _commands[tick].GetAll()) {
-                ApplyCommand(command);
-            }
-        }
-
-        
+    {   
         foreach(var entity in _world.Entities.Values)
         {
             var movement = entity.Movement;
@@ -73,6 +73,14 @@ public class Loop
             {
                 entity.Pos = movement.To;
                 entity.Movement = new Movement();
+                Logger?.Log($"Entity {entity.Id} has arrived at tile {entity.Pos}");
+            }
+        }
+
+        if (_commands.ContainsKey(tick))
+        {
+            foreach(var command in _commands[tick]) {
+                ApplyCommand(command);
             }
         }
     }
@@ -98,7 +106,7 @@ public class Loop
         var recoveryRange = (SnapshotQuantity - 1) * SnapshotInterval;
         if(tick < Tick)
         {
-            if(tick >= Tick - recoveryRange && tick >= 0)
+            if(tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
             {
                 recoveryNeeded = true;
             } 
@@ -112,12 +120,52 @@ public class Loop
         {
             _commands.Add(tick, new CommandList());
         }
-
         var commandsAtTick = _commands[tick];
-
         commandsAtTick.Add(command);
+        
+        if(tick > _lastCommandTick)
+        {
+            _lastCommandTick = tick;
+        }
 
         if(recoveryNeeded) RecoverState(tick);
+    }
+
+    public void InsertCommands(CommandList commands)
+    {
+        // Verify commands
+
+        var recoveryNeeded = false;
+        int leastRecentTick = 0;
+        var recoveryRange = (SnapshotQuantity - 1) * SnapshotInterval;
+        foreach (var command in commands)
+        {
+            int tick = command.Tick;
+            if(tick < leastRecentTick)
+            {
+                leastRecentTick = tick;
+            }
+            if(tick < Tick)
+            {
+                if(tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
+                {
+                    recoveryNeeded = true;
+                } 
+                else
+                {
+                    throw new ArgumentException($"Cannot recover state {Tick - tick} ticks behind, maximum is {(SnapshotQuantity - 1) * SnapshotInterval}");
+                }
+            }
+
+            if(!_commands.ContainsKey(tick))
+            {
+                _commands.Add(tick, []);
+            }
+            var commandsAtTick = _commands[tick];
+            commandsAtTick.Add(command);
+        }
+
+        if(recoveryNeeded) RecoverState(leastRecentTick);
     }
 
     public void ApplyCommand(ICommand command)
@@ -139,9 +187,20 @@ public class Loop
         }
     }
 
-    public World GetLastSnapshot()
+    public WorldState GetWorldData()
     {
         var snapshotTick = Tick / SnapshotInterval * SnapshotInterval;
-        return snapshots[snapshotTick];
+        var commands = new CommandList();
+        for(int tick = snapshotTick; tick <= _lastCommandTick; tick++)
+        {
+            if(_commands.ContainsKey(tick))
+            {
+                foreach (var command in _commands[tick])
+                {
+                    commands.Add(command);
+                }
+            }
+        }
+        return new WorldState(Tick, snapshotTick, snapshots[snapshotTick], commands);
     }
 }

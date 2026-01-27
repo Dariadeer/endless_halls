@@ -28,6 +28,10 @@ public partial class RemoteWorldView : Node
     private int _port;
 	private Player _player;
 
+    public override void _Ready()
+    {
+		SetProcess(false);
+    }
 	public async void Initialize(string address)
 	{
         // SetPhysicsProcess(false);
@@ -49,7 +53,6 @@ public partial class RemoteWorldView : Node
 
 		// GridView.TileClicked += OnTileClicked;
 
-		SetProcess(false);
 		_client = new();
         var match = Regex.Match(address, @"(?<host>((\d+\.){3}\d+))\:(?<port>\d+)");
         if(!match.Success) throw new ArgumentException("Invalid ip address input");
@@ -59,39 +62,59 @@ public partial class RemoteWorldView : Node
 
 		GD.Print($"Host: {_host}, Port: {_port}");
 
-		_client.OnConnect += OnServerConenct;
+		_client.OnConnect += OnServerConnect;
 		_client.OnMessage += OnServerMessage;
 		_client.OnDisconnect += OnServerDisconnect;
 
 		await _client.ConnectAsync(_host, _port);
 	}
 
-	public void Reinitialize(World world)
+	public void LaunchWorldLoop(WorldState data)
 	{
-		_context = new GameContext{
-			World = world,
-			CurrentTick = _loop.Tick,
-			TimeStart = _context != null ? _context.TimeStart : Time.GetUnixTimeFromSystem(),
-			LastTickProcessed = _loop.Tick
+		_loop = new Loop(data.World, data.SnapshotTick)
+        {
+            Logger = new GDLogger()
+        };
+
+		_loop.InsertCommands(data.Commands);
+
+		_context = new GameContext()
+		{
+			World = data.World,
+			CurrentTick = data.SnapshotTick,
+			TickStart = data.CurrentTick,
+			TimeStart = Time.GetUnixTimeFromSystem()
 		};
-		
+
+		_loop.WorldStateRecovered += OnWorldStateRecovered;
+		GridView.TileClicked += OnTileClicked;
 
 		GridView.Initialize(_context);
+		EntityManager.Initialize(_context);
 
+		SetProcess(true);
+	}
+
+	public void OnWorldStateRecovered(World world)
+	{
+		_context.World = world;
+		_context.CurrentTick = _loop.Tick;
+		
+		GridView.Initialize(_context);
 		EntityManager.Initialize(_context);
 	}
 
 	
 	public override void _Process(double delta)
 	{
-		// var now = Time.GetUnixTimeFromSystem();
+		var now = Time.GetUnixTimeFromSystem();;
 
-		// while(now > _context.CalculateTickTime(_context.CurrentTick))
-		// {
-		// 	_loop.Update();
+		while(now > _context.CalculateTickTime(_context.CurrentTick))
+		{
+			_loop.Update();
 
-		// 	_context.CurrentTick++;
-		// }
+			_context.CurrentTick++;
+		}
 	}
 
 	public void OnTileClicked(int x, int y)
@@ -112,47 +135,37 @@ public partial class RemoteWorldView : Node
 		// }
     }
 
-	public void OnServerConenct()
+	public void OnServerConnect()
 	{
-		_client.SendAsync(Request<Login>.Generate(new Login("Anton")));
+		_client.SendAsync(ClientMessage<Login>.Generate(new Login("Anton")));
 	}
 
 	public async void OnServerMessage(byte[] bytes)
 	{
-		var responseType = (ResponseType) bytes[0];
+		var responseType = (ServerMessageType) bytes[0];
 
 		switch (responseType)
 		{
-			case ResponseType.PlayerData:
-				var playerDataRes = new Response<Player>(bytes);
+			case ServerMessageType.PlayerData:
+				var playerDataRes = new ServerMessage<Player>(bytes);
 				GD.Print($"Welcome, player \"{playerDataRes.Content.Name}\" with ID {playerDataRes.Content.Id}");
-				await _client.SendAsync(Request<Join>.Generate(new Join()));
+				await _client.SendAsync(ClientMessage<Join>.Generate(new Join()));
 				break;
-			case ResponseType.WorldData:
-				var worldDataRes = new Response<World>(bytes);
-				World world = worldDataRes.Content;
+			case ServerMessageType.WorldState:
+				var worldDataRes = new ServerMessage<WorldState>(bytes);
+				var worldData = worldDataRes.Content;
+				var world = worldData.World;
 
-				_loop = new Loop(world)
-				{
-				    Logger = new GDLogger()
-				};
+				LaunchWorldLoop(worldData);
 
-				_loop.WorldStateRecovered += Reinitialize;
-
-				Reinitialize(world);
-
-				GridView.TileClicked += OnTileClicked;
-
-				GD.Print($"Joined a world with {world.Grid.Count} tiles and {world.Entities.Count} entities!");
-
-				SetProcess(true);
-				
+				GD.Print($"Joined a world with {world.Grid.Count} tiles, {world.Entities.Count} entities and {worldData.Commands.Count} commands!");
 				break;
 		}
 	}
 
 	public void OnServerDisconnect()
 	{
-		
+		SetProcess(false);
+		GD.Print("Server disconnected!");
 	}
 }

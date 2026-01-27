@@ -2,12 +2,13 @@ using Server.Utils;
 using Shared.Data;
 using Shared.Data.Commands;
 using Shared.Logic;
+using Shared.Network;
 
 namespace Server;
 
 public class WorldManager
 {
-    public Queue<ICommand> commandQueue = [];
+    public Queue<ICommand> CommandQueue = [];
     private Loop _loop;
     private readonly CancellationTokenSource _cts = new();
 
@@ -29,11 +30,11 @@ public class WorldManager
             long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             while(now > start + _loop.Tick * Loop.TICK_DURATION_MS)
             {
-                lock (commandQueue)
+                lock (CommandQueue)
                 {
-                    while(commandQueue.Count > 0)
+                    while(CommandQueue.Count > 0)
                     {
-                        _loop.InsertCommand(commandQueue.Dequeue());
+                        _loop.InsertCommand(CommandQueue.Dequeue());
                     }
                     _loop.Update();
                 }
@@ -46,8 +47,8 @@ public class WorldManager
         _cts.Cancel();
     }
 
-    public World GetWorldData()
+    public WorldState GetWorldData()
     {
-        return _loop.GetLastSnapshot();
+        return _loop.GetWorldData();
     }
 }

@@ -2,11 +2,11 @@ using Shared.Network.Messages;
 
 namespace Shared.Network;
 
-public class Login : ISerializable<Login>, IRequestable
+public class Login : ISerializable<Login>, IClientMessageable
 {
     public string Name;
 
-    public static RequestType RequestType => RequestType.Login;
+    public static ClientMessageType MessageType => ClientMessageType.Login;
 
     public Login(string name)
     {

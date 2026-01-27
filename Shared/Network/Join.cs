@@ -2,12 +2,13 @@ using Shared.Network.Messages;
 
 namespace Shared.Network;
 
-public class Join : ISerializable<Join>, IRequestable
+public class Join : ISerializable<Join>, IClientMessageable
 {
-    public static RequestType RequestType => RequestType.WorldData;
+    public static ClientMessageType MessageType => ClientMessageType.WorldData;
 
     public Join()
     {
+        
     }
     public void Encode(BinaryWriter writer)
     {

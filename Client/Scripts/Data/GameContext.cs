@@ -9,9 +9,11 @@ public class GameContext
     public int CurrentTick;
     public double LastTickProcessed;
     public double TimeStart;
+    public int TickStart = 0;
+    public double Delay = 0;
 
     public double CalculateTickTime(int tick)
     {
-        return Loop.TICK_DURATION_S * tick + TimeStart;
+        return Loop.TICK_DURATION_S * (tick - TickStart) + TimeStart;
     }
 }

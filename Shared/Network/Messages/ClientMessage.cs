@@ -2,11 +2,11 @@ using Shared.Network;
 
 namespace Shared.Network.Messages;
 
-public class Response<T> where T : ISerializable<T>, IRespondable
+public class ClientMessage<T> where T : ISerializable<T>, IClientMessageable
 {
     public T Content;
 
-    public Response(byte[] bytes)
+    public ClientMessage(byte[] bytes)
     {
         using var stream = new MemoryStream(bytes);
         using var reader = new BinaryReader(stream);
@@ -20,7 +20,7 @@ public class Response<T> where T : ISerializable<T>, IRespondable
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
 
-        writer.Write((byte) T.ResponseType);
+        writer.Write((byte) T.MessageType);
         requestObj.Encode(writer);
 
         return stream.ToArray();

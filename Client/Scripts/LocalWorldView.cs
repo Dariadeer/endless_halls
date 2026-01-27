@@ -82,7 +82,7 @@ public partial class LocalWorldView : Node
 		GD.Print($"Tile was clicked at {new Int2(x, y)}");
 
 		_loop.InsertCommand(new MoveCommand(
-			0, _context.CurrentTick - 25, 0, new Int2(x, y)
+			0, _context.CurrentTick, 0, new Int2(x, y)
 		));
 	}
 

@@ -2,28 +2,22 @@ using Shared.Network;
 
 namespace Shared.Data.Commands;
 
-public class CommandList : ISerializable<CommandList>
+public class CommandList : LinkedList<ICommand>, ISerializable<CommandList>
 {
-    private LinkedList<ICommand> _commands = [];
-
     public void Add(ICommand command)
     {
-        for(var node = _commands.Last; node != null; node = node.Previous)
+        for(var node = Last; node != null; node = node.Previous)
         {
             if(node.Value.Id < command.Id)
             {
-                _commands.AddAfter(node, command);
+                AddAfter(node, command);
                 return;
             }
         }
 
-        _commands.AddFirst(command);
+        AddFirst(command);
     }
 
-    public LinkedList<ICommand> GetAll()
-    {
-        return _commands;
-    }
     public static CommandList Decode(BinaryReader reader)
     {
         int count = reader.ReadInt32();
@@ -48,9 +42,9 @@ public class CommandList : ISerializable<CommandList>
 
     public void Encode(BinaryWriter writer)
     {
-        writer.Write(_commands.Count);
+        writer.Write(Count);
         
-        foreach (var command in _commands)
+        foreach (var command in this)
         {
             switch (command)
             {

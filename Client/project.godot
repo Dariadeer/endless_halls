@@ -21,7 +21,6 @@ run/assembly_name="Client"
 
 [display]
 
-window/size/borderless=true
 window/stretch/mode="canvas_items"
 
 [dotnet]

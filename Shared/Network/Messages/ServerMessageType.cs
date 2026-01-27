@@ -2,10 +2,10 @@ namespace Shared.Network.Messages;
 
 // Server Messages: MessageType > 128
 // Client Messages: MessageType < 128
-public enum RequestType : byte
+public enum ServerMessageType : byte
 {
     Ping = 0,
     Command = 1,
-    WorldData = 2,
-    Login = 3
+    WorldState = 2,
+    PlayerData = 3
 }

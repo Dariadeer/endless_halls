@@ -3,14 +3,14 @@ using Shared.Network.Messages;
 
 namespace Shared.Data;
 
-public class World : ISnapshot<World>, ISerializable<World>, IRespondable
+public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
 {
     public readonly TileMap Grid;
     public readonly EntityMap Entities;
 
     public Action<Entity> EntitySummoned;
 
-    public static ResponseType ResponseType => ResponseType.WorldData;
+    public static ServerMessageType MessageType => ServerMessageType.WorldState;
 
     public World(TileMap tileMap, EntityMap entityMap)
     {

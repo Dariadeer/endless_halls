@@ -46,7 +46,7 @@ public readonly struct Movement : ISerializable<Movement>
             return new Movement(
                 reader.ReadInt32(),
                 reader.ReadInt32(),
-                (Int2) Int2.Decode(reader)
+                Int2.Decode(reader)
             );
         }
     }
