@@ -23,6 +23,10 @@ public class ServerMessage<T> where T : ISerializable<T>, IServerMessageable
         writer.Write((byte) T.MessageType);
         requestObj.Encode(writer);
 
+        byte[] arr = stream.ToArray();
+
+        Console.WriteLine($"{arr.Length} bytes were sent to the client");
+
         return stream.ToArray();
     }
 }
