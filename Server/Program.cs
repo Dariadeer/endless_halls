@@ -14,6 +14,13 @@ class Program
     static int nextId = 0;
     static async Task Main(string[] args)
     {
+        int port = 3000;
+
+        if(args.Length > 0)
+        {
+            port = int.Parse(args[0]);
+        }
+
         var grid = new TileMap();
         grid.Generate(5);
         var entities = new EntityMap();
@@ -59,6 +66,10 @@ class Program
         {
             Console.WriteLine($"Client connected!");
         };
+        server.OnDisconnect += (client) =>
+        {
+            Console.WriteLine($"Client disconnected!");
+        };
         server.OnMessage += OnMessage;
         var serverTask = server.StartAsync();
         Console.WriteLine("Server started and listening on port 3000");
@@ -86,5 +97,10 @@ class Program
                 await client.SendAsync(ServerMessage<WorldState>.Generate(worldManager.GetWorldData()));
                 break;
         }
+    }
+
+    static async void OnDisconnect()
+    {
+        
     }
 }

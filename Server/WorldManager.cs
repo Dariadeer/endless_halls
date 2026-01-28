@@ -16,7 +16,7 @@ public class WorldManager
     {
         _loop = new Loop(world);
         _loop.Logger = new ServerLogger();
-        _loop.SnapshotQuantity = 1;
+        _loop.SnapshotQuantity = 2;
     }
 
     public async Task StartLoop()

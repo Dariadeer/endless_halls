@@ -32,7 +32,14 @@ public partial class Main : Node2D
     {
         RemoveChild(Menu);
         var instance = RemoteWorldScene.Instantiate<RemoteWorldView>();
+        instance.Main = this;
         instance.Initialize(address);
         AddChild(instance);
+    }
+
+    public void GoToMenu(Node source)
+    {
+        source.QueueFree();
+        AddChild(Menu);
     }
 }

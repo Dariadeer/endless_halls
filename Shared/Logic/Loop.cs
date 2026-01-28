@@ -36,11 +36,13 @@ public class Loop
 
     public void Update(int tick)
     {
-        if(tick % SnapshotInterval == 0)
-        {
-            snapshots[tick] = _world.Copy();
+        AdvanceWorld(tick);
 
-            int snapshotToRemoveTick = tick - SnapshotQuantity * SnapshotInterval;
+        if((tick + 1) % SnapshotInterval == 0)
+        {
+            snapshots[tick + 1] = _world.Copy();
+
+            int snapshotToRemoveTick = tick + 1 - SnapshotQuantity * SnapshotInterval;
             if(snapshotToRemoveTick != 0)
             {
                 snapshots.Remove(snapshotToRemoveTick);
@@ -48,8 +50,6 @@ public class Loop
 
             // Logger?.Log("Snapshot created at " + tick + ", total of " + snapshots.Count);
         }
-
-        AdvanceWorld(tick);
     }
 
     public void Update()

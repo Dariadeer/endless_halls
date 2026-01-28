@@ -21,8 +21,9 @@ public partial class RemoteWorldView : Node
 	public GridView GridView;
 	[Export]
 	public EntityManager EntityManager;
-	private GameContext _context;
+	public Main? Main;
 
+	private GameContext _context;
 	private GameClient _client;
     private string _host;
     private int _port;
@@ -126,13 +127,13 @@ public partial class RemoteWorldView : Node
 		// ));
 	}
 
-    public override void _Input(InputEvent @event)
+    public override async void _Input(InputEvent @event)
     {
-        // if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Space)
-		// {
-		// 	_loop.RecoverState(0);
-		// 	_context.TimeStart = Time.GetUnixTimeFromSystem();
-		// }
+        if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Escape)
+		{
+			await _client.DisconnectAsync();
+			Main.GoToMenu(this);
+		}
     }
 
 	public void OnServerConnect()
@@ -143,7 +144,6 @@ public partial class RemoteWorldView : Node
 	public async void OnServerMessage(byte[] bytes)
 	{
 		var responseType = (ServerMessageType) bytes[0];
-
 		switch (responseType)
 		{
 			case ServerMessageType.PlayerData:
@@ -167,5 +167,9 @@ public partial class RemoteWorldView : Node
 	{
 		SetProcess(false);
 		GD.Print("Server disconnected!");
+		if(Main != null)
+		{
+			Main.GoToMenu(this);
+		}
 	}
 }
