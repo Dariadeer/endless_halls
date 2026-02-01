@@ -3,13 +3,18 @@ using Shared.Data;
 using Shared.Data.Commands;
 using Shared.Logic;
 using Shared.Network;
+using Shared.Network.Messages;
 
 namespace Server;
 
 public class WorldManager
 {
+    public int randomCounter = 0;
+    public int Id = 0;
     public Queue<ICommand> CommandQueue = [];
+    public Dictionary<Connection, Player> Players = [];
     private Loop _loop;
+    public int CommandTickDelay = 5;
     private readonly CancellationTokenSource _cts = new();
 
     public WorldManager(World world)
@@ -47,8 +52,57 @@ public class WorldManager
         _cts.Cancel();
     }
 
+    public void Broadcast(ICommand command)
+    {
+        foreach(var connection in Players.Keys)
+        {
+            switch (command) {
+                case MoveCommand move:
+                    connection.SendAsync(ServerMessage<MoveCommand>.Generate(move));
+                    break;
+            }
+        }
+    }
+
     public WorldState GetWorldData()
     {
         return _loop.GetWorldData();
     }
+
+    public void AddPlayer(Connection connection, Player player) 
+    {
+        Players[connection] = player;
+        var playerEntity = new Entity(randomCounter++)
+        {
+            Pos = new(0, 0),
+            TeamId = player.Id,
+            Movement = new Movement()
+        };
+        var serverSummon = new SummonCommand(1, GetDelayedTick(), playerEntity);
+        _loop.InsertCommand(serverSummon);
+        Broadcast(serverSummon);
+    }
+
+    public void RemovePlayer(Connection connection)
+    {
+        Players.Remove(connection);
+    }
+
+    public void ReceiveMovement(Connection connection, MoveCommand move)
+    {
+        var player = Players[connection];
+        var entity = _loop.World.Entities[move.EntityId];
+        if(player.Id == entity.TeamId)
+        {
+            var serverMove = new MoveCommand(2, GetDelayedTick(), entity.Id, move.To);
+            _loop.InsertCommand(serverMove);
+            Broadcast(serverMove);
+        }
+    }
+
+    private int GetDelayedTick()
+    {
+        return _loop.Tick + CommandTickDelay;
+    }
+
 }

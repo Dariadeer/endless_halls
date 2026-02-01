@@ -10,9 +10,9 @@ public class GameServer
     private readonly CancellationTokenSource _cts = new();
     private readonly List<Task> _clientTasks = new();
 
-    public event Action<ClientConnection>? OnConnect;
-    public event Action<ClientConnection, byte[]>? OnMessage;
-    public event Action<ClientConnection>? OnDisconnect;
+    public event Action<Connection>? OnConnect;
+    public event Action<Connection, byte[]>? OnMessage;
+    public event Action<Connection>? OnDisconnect;
 
     public GameServer(int port)
     {
@@ -38,7 +38,7 @@ public class GameServer
                     break;
                 }
 
-                var connection = new ClientConnection(tcpClient);
+                var connection = new Connection(tcpClient);
                 OnConnect?.Invoke(connection);
 
                 var task = HandleClientAsync(connection, _cts.Token);
@@ -70,7 +70,7 @@ public class GameServer
     }
 
 
-    private async Task HandleClientAsync(ClientConnection client, CancellationToken ct)
+    private async Task HandleClientAsync(Connection client, CancellationToken ct)
     {
         try
         {

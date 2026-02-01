@@ -6,7 +6,7 @@ public class Login : ISerializable<Login>, IClientMessageable
 {
     public string Name;
 
-    public static ClientMessageType MessageType => ClientMessageType.Login;
+    public static ClientMessageType MessageType => ClientMessageType.Join;
 
     public Login(string name)
     {

@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using Client.Scripts.Network;
 using Shared.Network;
 using Shared.Network.Messages;
+using System.Linq;
 
 public partial class RemoteWorldView : Node
 {
@@ -28,6 +29,7 @@ public partial class RemoteWorldView : Node
     private string _host;
     private int _port;
 	private Player _player;
+	private Entity _entity;
 
     public override void _Ready()
     {
@@ -92,6 +94,7 @@ public partial class RemoteWorldView : Node
 
 		GridView.Initialize(_context);
 		EntityManager.Initialize(_context);
+		_context.World.EntitySummoned += OnEntitySummoned;
 
 		SetProcess(true);
 	}
@@ -103,6 +106,7 @@ public partial class RemoteWorldView : Node
 		
 		GridView.Initialize(_context);
 		EntityManager.Initialize(_context);
+		_context.World.EntitySummoned += OnEntitySummoned;
 	}
 
 	
@@ -118,13 +122,14 @@ public partial class RemoteWorldView : Node
 		}
 	}
 
-	public void OnTileClicked(int x, int y)
+	public async void OnTileClicked(int x, int y)
 	{
 		GD.Print($"Tile was clicked at {new Int2(x, y)}");
 
-		// _loop.InsertCommand(new MoveCommand(
-		// 	0, _context.CurrentTick + 10, 0, new Int2(x, y)
-		// ));
+		var move = new MoveCommand(-1, -1, _entity.Id, new Int2(x, y));
+
+		await _client.SendAsync(ClientMessage<MoveCommand>.Generate(move));
+		GD.Print("Sent move intent to the server!");
 	}
 
     public override async void _Input(InputEvent @event)
@@ -136,6 +141,14 @@ public partial class RemoteWorldView : Node
 		}
     }
 
+	public void OnEntitySummoned(Entity entity)
+	{
+		if(entity.TeamId == _player.Id)
+		{
+			_entity = entity;
+		}
+	}
+
 	public void OnServerConnect()
 	{
 		_client.SendAsync(ClientMessage<Login>.Generate(new Login("Anton")));
@@ -143,22 +156,36 @@ public partial class RemoteWorldView : Node
 
 	public async void OnServerMessage(byte[] bytes)
 	{
+		GD.Print($"{bytes.Length} bytes received");
 		var responseType = (ServerMessageType) bytes[0];
 		switch (responseType)
 		{
 			case ServerMessageType.PlayerData:
-				var playerDataRes = new ServerMessage<Player>(bytes);
-				GD.Print($"Welcome, player \"{playerDataRes.Content.Name}\" with ID {playerDataRes.Content.Id}");
-				await _client.SendAsync(ClientMessage<Join>.Generate(new Join()));
+				var playerDataMsg = new ServerMessage<Player>(bytes);
+				_player = playerDataMsg.Content;
+				GD.Print($"Welcome, player \"{_player.Name}\" with ID {_player.Id}");
+				await _client.SendAsync(ClientMessage<WorldDataRequest>.Generate(new WorldDataRequest()));
 				break;
 			case ServerMessageType.WorldState:
-				var worldDataRes = new ServerMessage<WorldState>(bytes);
-				var worldData = worldDataRes.Content;
+				var worldDataMsg = new ServerMessage<WorldState>(bytes);
+				var worldData = worldDataMsg.Content;
 				var world = worldData.World;
+				try
+				{
+					_entity = world.Entities.First((KeyValuePair<int, Entity> pair) => pair.Value.TeamId == _player.Id).Value;
+				} catch(Exception) {}
 
 				LaunchWorldLoop(worldData);
 
 				GD.Print($"Joined a world with {world.Grid.Count} tiles, {world.Entities.Count} entities and {worldData.Commands.Count} commands!");
+				break;
+			case ServerMessageType.Move:
+				var moveCmdMsg = new ServerMessage<MoveCommand>(bytes);
+				_loop.InsertCommand(moveCmdMsg.Content);
+				break;
+			case ServerMessageType.Summon:
+				var summonCmdMsg = new ServerMessage<SummonCommand>(bytes);
+				_loop.InsertCommand(summonCmdMsg.Content);
 				break;
 		}
 	}

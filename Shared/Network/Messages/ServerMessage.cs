@@ -1,3 +1,4 @@
+using Shared.Data.Commands;
 using Shared.Network;
 
 namespace Shared.Network.Messages;
@@ -15,18 +16,23 @@ public class ServerMessage<T> where T : ISerializable<T>, IServerMessageable
         Content = T.Decode(reader);
     }
 
-    public static byte[] Generate(T requestObj)
+    public static byte[] Generate(T objToSend)
     {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
 
         writer.Write((byte) T.MessageType);
-        requestObj.Encode(writer);
+        objToSend.Encode(writer);
 
         byte[] arr = stream.ToArray();
 
         Console.WriteLine($"{arr.Length} bytes were sent to the client");
 
         return stream.ToArray();
+    }
+
+    public static CommandType RecognizeCommandType(byte[] bytes)
+    {
+        return (CommandType) bytes[0];
     }
 }

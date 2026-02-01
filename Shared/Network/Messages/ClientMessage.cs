@@ -15,13 +15,13 @@ public class ClientMessage<T> where T : ISerializable<T>, IClientMessageable
         Content = T.Decode(reader);
     }
 
-    public static byte[] Generate(T requestObj)
+    public static byte[] Generate(T objToSend)
     {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
 
         writer.Write((byte) T.MessageType);
-        requestObj.Encode(writer);
+        objToSend.Encode(writer);
 
         return stream.ToArray();
     }

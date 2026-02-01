@@ -5,7 +5,9 @@ namespace Shared.Network.Messages;
 public enum ServerMessageType : byte
 {
     Ping = 0,
-    Command = 1,
+    Commands = 1,
     WorldState = 2,
-    PlayerData = 3
+    PlayerData = 3,
+    Move = 4,
+    Summon = 5
 }

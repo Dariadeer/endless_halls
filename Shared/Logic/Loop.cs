@@ -15,7 +15,7 @@ public class Loop
     public event Action<World> WorldStateRecovered;
 
 	public ILogger? Logger;
-    private World _world;
+    public World World;
     public int Tick;
     public int FurthestTickProcessed = 0;
     private readonly Dictionary<int, CommandList> _commands = [];
@@ -25,13 +25,13 @@ public class Loop
     public Loop(World world)
     {
         Tick = 0;
-        _world = world;
+        World = world;
     }
 
     public Loop(World world, int initialTick)
     {
         Tick = initialTick;
-        _world = world;
+        World = world;
     }
 
     public void Update(int tick)
@@ -40,7 +40,7 @@ public class Loop
 
         if((tick + 1) % SnapshotInterval == 0)
         {
-            snapshots[tick + 1] = _world.Copy();
+            snapshots[tick + 1] = World.Copy();
 
             int snapshotToRemoveTick = tick + 1 - SnapshotQuantity * SnapshotInterval;
             if(snapshotToRemoveTick != 0)
@@ -61,12 +61,14 @@ public class Loop
             FurthestTickProcessed = Tick;
         }
 
+        // Logger?.Log(Tick);
+
         Tick++;
     }
 
     public void AdvanceWorld(int tick)
     {   
-        foreach(var entity in _world.Entities.Values)
+        foreach(var entity in World.Entities.Values)
         {
             var movement = entity.Movement;
             if(movement.State == MovementState.Moving && movement.End == tick)
@@ -90,13 +92,13 @@ public class Loop
         var currentTick = tick / SnapshotInterval * SnapshotInterval;
         var snapshot = snapshots[currentTick];
 
-        _world = snapshot;
+        World = snapshot;
 
         Logger?.Log($"Recovering from snapshot {currentTick}/{Tick} ({tick})");
 
         Tick = currentTick;
 
-        WorldStateRecovered.Invoke(_world);
+        WorldStateRecovered.Invoke(World);
     }
 
     public void InsertCommand(ICommand command)
@@ -175,14 +177,17 @@ public class Loop
         switch (command)
         {
             case MoveCommand move:
-                entity = _world.Entities[move.EntityId];
+                entity = World.Entities[move.EntityId];
                 entity.Movement = new Movement(
                     Tick, Tick + 50, move.To
                 );
                 break;
             case SummonCommand summon:
                 entity = summon.Summonee.Copy();
-                _world.SummonEntity(entity);
+                World.SummonEntity(entity);
+                break;
+            default:
+                Logger?.Log("Unrecognized command!");
                 break;
         }
     }

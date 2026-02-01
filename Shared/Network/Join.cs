@@ -2,11 +2,11 @@ using Shared.Network.Messages;
 
 namespace Shared.Network;
 
-public class Join : ISerializable<Join>, IClientMessageable
+public class WorldDataRequest : ISerializable<WorldDataRequest>, IClientMessageable
 {
     public static ClientMessageType MessageType => ClientMessageType.WorldData;
 
-    public Join()
+    public WorldDataRequest()
     {
         
     }
@@ -15,8 +15,8 @@ public class Join : ISerializable<Join>, IClientMessageable
         
     }
 
-    public static Join Decode(BinaryReader reader)
+    public static WorldDataRequest Decode(BinaryReader reader)
     {
-        return new Join();
+        return new WorldDataRequest();
     }
 }

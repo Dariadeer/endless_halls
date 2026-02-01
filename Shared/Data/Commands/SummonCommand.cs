@@ -1,13 +1,16 @@
 using Shared.Network;
 using Shared.Data;
 using Shared.Math;
+using Shared.Network.Messages;
 
 namespace Shared.Data.Commands;
 
-public class SummonCommand : ICommand, ISerializable<SummonCommand>
+public class SummonCommand : ICommand, ISerializable<SummonCommand>, IServerMessageable
 {
     public int Id { get; }
     public int Tick { get; }
+
+    public static ServerMessageType MessageType => ServerMessageType.Summon;
 
     public readonly Entity Summonee;
     public readonly Int2 To;

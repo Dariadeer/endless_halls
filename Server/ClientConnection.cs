@@ -2,12 +2,12 @@ using System.Net.Sockets;
 
 namespace Server;
 
-public sealed class ClientConnection : IDisposable
+public sealed class Connection : IDisposable
 {
     public TcpClient TcpClient { get; }
     public NetworkStream Stream => TcpClient.GetStream();
 
-    public ClientConnection(TcpClient client)
+    public Connection(TcpClient client)
     {
         TcpClient = client;
     }

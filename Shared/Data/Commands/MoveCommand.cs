@@ -1,12 +1,17 @@
 using Shared.Math;
 using Shared.Network;
+using Shared.Network.Messages;
 
 namespace Shared.Data.Commands;
 
-public class MoveCommand : ICommand, ISerializable<MoveCommand>
+public class MoveCommand : ICommand, ISerializable<MoveCommand>, IClientMessageable, IServerMessageable
 {
     public int Id { get; }
     public int Tick { get; }
+
+    public static ClientMessageType MessageType => ClientMessageType.Move;
+
+    static ServerMessageType IServerMessageable.MessageType => ServerMessageType.Move;
 
     public readonly int EntityId;
     public readonly Int2 To;

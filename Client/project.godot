@@ -8,11 +8,15 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Endless Halls"
 run/main_scene="uid://0donpiwjqs3d"
-config/features=PackedStringArray("4.5", "C#", "Mobile")
+config/features=PackedStringArray("4.6", "C#", "Mobile")
 config/icon="res://icon.svg"
 run/solution_directory=""
 run/default_signal_callback_to_self_name="_on_{signal_name}"
@@ -78,3 +82,6 @@ common/physics_ticks_per_second=120
 
 renderer/rendering_method="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/smaa_edge_detection_threshold=0.01
+anti_aliasing/quality/screen_space_aa=2
+anti_aliasing/quality/use_taa=true

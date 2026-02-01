@@ -8,7 +8,7 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     public readonly TileMap Grid;
     public readonly EntityMap Entities;
 
-    public Action<Entity> EntitySummoned;
+    public Action<Entity>? EntitySummoned;
 
     public static ServerMessageType MessageType => ServerMessageType.WorldState;
 
@@ -21,7 +21,7 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     public void SummonEntity(Entity entity)
     {
         Entities.AddEntity(entity);
-        EntitySummoned.Invoke(entity);
+        EntitySummoned?.Invoke(entity);
     }
 
     public World Copy()

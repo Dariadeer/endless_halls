@@ -5,7 +5,7 @@ namespace Shared.Network.Messages;
 public enum ClientMessageType : byte
 {
     Ping = 0,
-    Command = 1,
+    Move = 1,
     WorldData = 2,
-    Login = 3
+    Join = 3
 }
