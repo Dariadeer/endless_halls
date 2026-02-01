@@ -158,6 +158,7 @@ public partial class RemoteWorldView : Node
 	{
 		GD.Print($"{bytes.Length} bytes received");
 		var responseType = (ServerMessageType) bytes[0];
+		GD.Print("Server Message Type: " + responseType);
 		switch (responseType)
 		{
 			case ServerMessageType.PlayerData:
@@ -185,7 +186,11 @@ public partial class RemoteWorldView : Node
 				break;
 			case ServerMessageType.Summon:
 				var summonCmdMsg = new ServerMessage<SummonCommand>(bytes);
+				GD.Print("Summoning entity " + summonCmdMsg.Content.Summonee.Id);
 				_loop.InsertCommand(summonCmdMsg.Content);
+				break;
+			default:
+				GD.Print($"Couldn't recognize type of this message ({responseType})");
 				break;
 		}
 	}

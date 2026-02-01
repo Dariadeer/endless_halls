@@ -60,6 +60,9 @@ public class WorldManager
                 case MoveCommand move:
                     connection.SendAsync(ServerMessage<MoveCommand>.Generate(move));
                     break;
+                case SummonCommand summon:
+                    connection.SendAsync(ServerMessage<SummonCommand>.Generate(summon));
+                    break;
             }
         }
     }
