@@ -18,6 +18,11 @@ public partial class TileView : Node2D
         var collider = GetNode<Area2D>("TileCollider");
         collider.MouseEntered += OnMouseEntered;
         collider.MouseExited += OnMouseExited;
+
+        if (!_tile.IsWalkable())
+        {
+            GetNode<Polygon2D>("Polygon2D").Color = new Color(0.7f ,0.7f, 0.7f);
+        }
     }
 
     public void OnMouseEntered()

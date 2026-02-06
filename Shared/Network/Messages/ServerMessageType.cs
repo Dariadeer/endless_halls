@@ -8,6 +8,6 @@ public enum ServerMessageType : byte
     Commands = 1,
     WorldState = 2,
     PlayerData = 3,
-    Move = 4,
-    Summon = 5
+    Movement = 4,
+    Appearance = 5
 }

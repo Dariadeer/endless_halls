@@ -82,6 +82,3 @@ common/physics_ticks_per_second=120
 
 renderer/rendering_method="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
-anti_aliasing/quality/smaa_edge_detection_threshold=0.01
-anti_aliasing/quality/screen_space_aa=2
-anti_aliasing/quality/use_taa=true

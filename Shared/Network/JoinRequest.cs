@@ -2,13 +2,13 @@ using Shared.Network.Messages;
 
 namespace Shared.Network;
 
-public class Login : ISerializable<Login>, IClientMessageable
+public class JoinRequest : ISerializable<JoinRequest>, IClientMessageable
 {
     public string Name;
 
     public static ClientMessageType MessageType => ClientMessageType.Join;
 
-    public Login(string name)
+    public JoinRequest(string name)
     {
         Name = name;
     }
@@ -17,9 +17,9 @@ public class Login : ISerializable<Login>, IClientMessageable
         writer.Write(Name);
     }
 
-    public static Login Decode(BinaryReader reader)
+    public static JoinRequest Decode(BinaryReader reader)
     {
-        return new Login(
+        return new JoinRequest(
             reader.ReadString()
         );
     }

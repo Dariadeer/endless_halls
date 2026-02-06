@@ -7,7 +7,7 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
 {
     public readonly TileMap Grid;
     public readonly EntityMap Entities;
-
+    public readonly TileMapPathfinder Pathfinder;
     public Action<Entity>? EntitySummoned;
 
     public static ServerMessageType MessageType => ServerMessageType.WorldState;
@@ -16,12 +16,25 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     {
         Grid = tileMap;
         Entities = entityMap;
+        Pathfinder = new(tileMap);
     }
 
     public void SummonEntity(Entity entity)
     {
         Entities.AddEntity(entity);
         EntitySummoned?.Invoke(entity);
+    }
+
+    public void Advance(int tick)
+    {
+        foreach(var entity in Entities.Values)
+        {
+            var movement = entity.Movement;
+            if(movement.State == MovementState.Moving && movement.End == tick)
+            {
+                entity.CompleteMovement(tick);
+            }
+        }
     }
 
     public World Copy()

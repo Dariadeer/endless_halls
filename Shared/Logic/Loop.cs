@@ -2,6 +2,7 @@ namespace Shared.Logic;
 
 using Shared.Data;
 using Shared.Data.Commands;
+using Shared.Math;
 using Shared.Network;
 using Shared.Utils;
 
@@ -26,12 +27,14 @@ public class Loop
     {
         Tick = 0;
         World = world;
+        snapshots[Tick] = World.Copy();
     }
 
     public Loop(World world, int initialTick)
     {
         Tick = initialTick;
         World = world;
+        snapshots[Tick] = World.Copy();
     }
 
     public void Update(int tick)
@@ -48,7 +51,7 @@ public class Loop
                 snapshots.Remove(snapshotToRemoveTick);
             }
 
-            // Logger?.Log("Snapshot created at " + tick + ", total of " + snapshots.Count);
+            // Logger?.Log("Snapshot created at " + (tick + 1) + ", total of " + snapshots.Count);
         }
     }
 
@@ -68,16 +71,7 @@ public class Loop
 
     public void AdvanceWorld(int tick)
     {   
-        foreach(var entity in World.Entities.Values)
-        {
-            var movement = entity.Movement;
-            if(movement.State == MovementState.Moving && movement.End == tick)
-            {
-                entity.Pos = movement.To;
-                entity.Movement = new Movement();
-                Logger?.Log($"Entity {entity.Id} has arrived at tile {entity.Pos}");
-            }
-        }
+        World.Advance(tick);
 
         if (_commands.ContainsKey(tick))
         {
@@ -98,7 +92,7 @@ public class Loop
 
         Tick = currentTick;
 
-        WorldStateRecovered.Invoke(World);
+        WorldStateRecovered?.Invoke(World);
     }
 
     public void InsertCommand(ICommand command)
@@ -178,11 +172,20 @@ public class Loop
         {
             case MoveCommand move:
                 entity = World.Entities[move.EntityId];
-                entity.Movement = new Movement(
-                    Tick, Tick + 50, move.To
-                );
+                var lastPos = entity.Path.LastOrDefault(entity.Movement.State == MovementState.Idle ? entity.Pos : entity.Movement.To);
+                LinkedList<Int2> steps;
+                try
+                {
+                    steps = World.Pathfinder.BFS(lastPos, move.To);
+                }
+                catch (PathNotFoundException)
+                {
+                    steps = [];
+                }
+                entity.AppendPath(steps, Tick);
+                Logger?.Log($"{steps.Count} tiles to travel, {entity.Path.Count} steps in total!");
                 break;
-            case SummonCommand summon:
+            case AppearCommand summon:
                 entity = summon.Summonee.Copy();
                 World.SummonEntity(entity);
                 break;
@@ -192,7 +195,7 @@ public class Loop
         }
     }
 
-    public WorldState GetWorldData()
+    public WorldStateResponse GetWorldData()
     {
         var snapshotTick = Tick / SnapshotInterval * SnapshotInterval;
         var commands = new CommandList();
@@ -206,6 +209,6 @@ public class Loop
                 }
             }
         }
-        return new WorldState(Tick, snapshotTick, snapshots[snapshotTick], commands);
+        return new WorldStateResponse(Tick, snapshotTick, snapshots[snapshotTick], commands);
     }
 }

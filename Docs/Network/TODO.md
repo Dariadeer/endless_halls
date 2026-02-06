@@ -1,0 +1,10 @@
+- [x] Basic
+	- [x] Add an ability to chain movements
+	- [x] Add *deterministic* pathfinding
+	- [x] Add movement lines
+- [ ] Netcode
+	- [ ] Add disconnect events
+	- [ ] Add move cancellation requests/events
+	- [ ] Add ping events and delay adjustment
+	- [ ] Implement move queue serialisation
+	- [ ] Implement message fragmentation for when too much data is to be sent

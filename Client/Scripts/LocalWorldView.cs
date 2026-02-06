@@ -36,7 +36,7 @@ public partial class LocalWorldView : Node
 
 		Reinitialize(world);
 
-		_loop.InsertCommand(new SummonCommand(
+		_loop.InsertCommand(new AppearCommand(
 			0, 0,
 			new Entity(0)
 			{
@@ -54,7 +54,7 @@ public partial class LocalWorldView : Node
 		_context = new GameContext{
 			World = world,
 			CurrentTick = _loop.Tick,
-			TimeStart = _context != null ? _context.TimeStart : Time.GetUnixTimeFromSystem(),
+			TimeStart = _context != null ? _context.TimeStart : DateTimeOffset.Now.ToUnixTimeMilliseconds(),
 			LastTickProcessed = _loop.Tick
 		};
 		
@@ -67,7 +67,7 @@ public partial class LocalWorldView : Node
 	
 	public override void _Process(double delta)
 	{
-		var now = Time.GetUnixTimeFromSystem();
+		var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
 		while(now > _context.CalculateTickTime(_context.CurrentTick))
 		{
@@ -91,7 +91,7 @@ public partial class LocalWorldView : Node
         if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Space)
 		{
 			_loop.RecoverState(0);
-			_context.TimeStart = Time.GetUnixTimeFromSystem();
+			_context.TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		}
     }
 }

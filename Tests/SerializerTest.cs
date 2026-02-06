@@ -33,7 +33,7 @@ public class SerializerTest
     [Fact]
     public void TestSummonCommandSerialization()
     {
-        var summon = new SummonCommand(123, 321, new Entity(412)
+        var summon = new AppearCommand(123, 321, new Entity(412)
         {
             TeamId = 0,
             Pos = new(22523, 12414),
@@ -54,7 +54,7 @@ public class SerializerTest
             stream
         );
 
-        var summon2 = SummonCommand.Decode(reader);
+        var summon2 = AppearCommand.Decode(reader);
         Assert.Equal(summon.To, summon2.To);
     }
 

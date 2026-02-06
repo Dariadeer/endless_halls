@@ -3,9 +3,10 @@ using Shared.Network;
 
 namespace Shared.Data;
 
-public readonly struct Movement : ISerializable<Movement>
+public class Movement : ISerializable<Movement>
 {
-    public readonly MovementState State;
+    public static readonly Movement Idle = new();
+    public readonly MovementState State = MovementState.Idle;
     public readonly int Start;
     public readonly int End;
     public readonly Int2 To;
@@ -18,10 +19,7 @@ public readonly struct Movement : ISerializable<Movement>
         To = to;
     }
 
-    public Movement()
-    {
-        State = MovementState.Idle;
-    }
+    public Movement() { }
 
     public void Encode(BinaryWriter writer)
     {

@@ -11,7 +11,7 @@ public class MoveCommand : ICommand, ISerializable<MoveCommand>, IClientMessagea
 
     public static ClientMessageType MessageType => ClientMessageType.Move;
 
-    static ServerMessageType IServerMessageable.MessageType => ServerMessageType.Move;
+    static ServerMessageType IServerMessageable.MessageType => ServerMessageType.Movement;
 
     public readonly int EntityId;
     public readonly Int2 To;

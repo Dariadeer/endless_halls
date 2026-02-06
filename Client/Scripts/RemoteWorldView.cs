@@ -30,6 +30,7 @@ public partial class RemoteWorldView : Node
     private int _port;
 	private Player _player;
 	private Entity _entity;
+	private long _lastPingTime = 0;
 
     public override void _Ready()
     {
@@ -37,24 +38,7 @@ public partial class RemoteWorldView : Node
     }
 	public async void Initialize(string address)
 	{
-        // SetPhysicsProcess(false);
-
-		
-        // Shared.Data.TileMap grid = new();
-		// grid.Generate(5);
-
-		// World world = new(grid, []);
-
-		// _loop = new Loop(world)
-        // {
-        //     Logger = new GDLogger()
-        // };
-
-		// _loop.WorldStateRecovered += Reinitialize;
-
-		// Reinitialize(world);
-
-		// GridView.TileClicked += OnTileClicked;
+		GlobalLogger.Instance.SetLogFunction(GD.Print);	
 
 		_client = new();
         var match = Regex.Match(address, @"(?<host>((\d+\.){3}\d+))\:(?<port>\d+)");
@@ -72,7 +56,7 @@ public partial class RemoteWorldView : Node
 		await _client.ConnectAsync(_host, _port);
 	}
 
-	public void LaunchWorldLoop(WorldState data)
+	public void LaunchWorldLoop(WorldStateResponse data)
 	{
 		_loop = new Loop(data.World, data.SnapshotTick)
         {
@@ -86,7 +70,7 @@ public partial class RemoteWorldView : Node
 			World = data.World,
 			CurrentTick = data.SnapshotTick,
 			TickStart = data.CurrentTick,
-			TimeStart = Time.GetUnixTimeFromSystem()
+			TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds()
 		};
 
 		_loop.WorldStateRecovered += OnWorldStateRecovered;
@@ -112,7 +96,7 @@ public partial class RemoteWorldView : Node
 	
 	public override void _Process(double delta)
 	{
-		var now = Time.GetUnixTimeFromSystem();;
+		var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
 		while(now > _context.CalculateTickTime(_context.CurrentTick))
 		{
@@ -120,16 +104,26 @@ public partial class RemoteWorldView : Node
 
 			_context.CurrentTick++;
 		}
+
+		if(now - _lastPingTime > 1000)
+		{
+			_client.SendAsync(ClientMessage<ClientPing>.Generate(new ClientPing
+			{
+				LocalTick = _loop.Tick,
+				LocalTime = now
+			}));
+
+			_lastPingTime = now;
+		}
 	}
 
 	public async void OnTileClicked(int x, int y)
 	{
 		GD.Print($"Tile was clicked at {new Int2(x, y)}");
 
-		var move = new MoveCommand(-1, -1, _entity.Id, new Int2(x, y));
+		var move = new MoveCommand(-1, _loop.Tick, _entity.Id, new Int2(x, y));
 
 		await _client.SendAsync(ClientMessage<MoveCommand>.Generate(move));
-		GD.Print("Sent move intent to the server!");
 	}
 
     public override async void _Input(InputEvent @event)
@@ -151,14 +145,14 @@ public partial class RemoteWorldView : Node
 
 	public void OnServerConnect()
 	{
-		_client.SendAsync(ClientMessage<Login>.Generate(new Login("Anton")));
+		_client.SendAsync(ClientMessage<JoinRequest>.Generate(new JoinRequest("Anton")));
 	}
 
 	public async void OnServerMessage(byte[] bytes)
 	{
-		GD.Print($"{bytes.Length} bytes received");
+		// GD.Print($"{bytes.Length} bytes received");
 		var responseType = (ServerMessageType) bytes[0];
-		GD.Print("Server Message Type: " + responseType);
+		// GD.Print("Server Message Type: " + responseType);
 		switch (responseType)
 		{
 			case ServerMessageType.PlayerData:
@@ -168,7 +162,7 @@ public partial class RemoteWorldView : Node
 				await _client.SendAsync(ClientMessage<WorldDataRequest>.Generate(new WorldDataRequest()));
 				break;
 			case ServerMessageType.WorldState:
-				var worldDataMsg = new ServerMessage<WorldState>(bytes);
+				var worldDataMsg = new ServerMessage<WorldStateResponse>(bytes);
 				var worldData = worldDataMsg.Content;
 				var world = worldData.World;
 				try
@@ -180,14 +174,18 @@ public partial class RemoteWorldView : Node
 
 				GD.Print($"Joined a world with {world.Grid.Count} tiles, {world.Entities.Count} entities and {worldData.Commands.Count} commands!");
 				break;
-			case ServerMessageType.Move:
+			case ServerMessageType.Movement:
 				var moveCmdMsg = new ServerMessage<MoveCommand>(bytes);
 				_loop.InsertCommand(moveCmdMsg.Content);
 				break;
-			case ServerMessageType.Summon:
-				var summonCmdMsg = new ServerMessage<SummonCommand>(bytes);
-				GD.Print("Summoning entity " + summonCmdMsg.Content.Summonee.Id);
+			case ServerMessageType.Appearance:
+				var summonCmdMsg = new ServerMessage<AppearCommand>(bytes);
+				// GD.Print("Summoning entity " + summonCmdMsg.Content.Summonee.Id);
 				_loop.InsertCommand(summonCmdMsg.Content);
+				break;
+			case ServerMessageType.Ping:
+				var ping = new ServerMessage<ServerPing>(bytes).Content;
+				GD.Print($"Ping: {DateTimeOffset.Now.ToUnixTimeMilliseconds() - ping.ClientPing.LocalTime}");
 				break;
 			default:
 				GD.Print($"Couldn't recognize type of this message ({responseType})");

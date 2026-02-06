@@ -5,17 +5,17 @@ using Shared.Network.Messages;
 
 namespace Shared.Data.Commands;
 
-public class SummonCommand : ICommand, ISerializable<SummonCommand>, IServerMessageable
+public class AppearCommand : ICommand, ISerializable<AppearCommand>, IServerMessageable
 {
     public int Id { get; }
     public int Tick { get; }
 
-    public static ServerMessageType MessageType => ServerMessageType.Summon;
+    public static ServerMessageType MessageType => ServerMessageType.Appearance;
 
     public readonly Entity Summonee;
     public readonly Int2 To;
 
-    public SummonCommand(int id, int tick, Entity summonee)
+    public AppearCommand(int id, int tick, Entity summonee)
     {
         Id = id;
         Tick = tick;
@@ -30,9 +30,9 @@ public class SummonCommand : ICommand, ISerializable<SummonCommand>, IServerMess
         To.Encode(writer);
     }
 
-    public static SummonCommand Decode(BinaryReader reader)
+    public static AppearCommand Decode(BinaryReader reader)
     {
-        return new SummonCommand(
+        return new AppearCommand(
             reader.ReadInt32(),
             reader.ReadInt32(),
             Entity.Decode(reader)

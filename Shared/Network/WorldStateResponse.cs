@@ -4,7 +4,7 @@ using Shared.Network.Messages;
 
 namespace Shared.Network;
 
-public class WorldState : ISerializable<WorldState>, IServerMessageable
+public class WorldStateResponse : ISerializable<WorldStateResponse>, IServerMessageable
 {
     public int CurrentTick;
     public int SnapshotTick;
@@ -13,7 +13,7 @@ public class WorldState : ISerializable<WorldState>, IServerMessageable
 
     public static ServerMessageType MessageType => ServerMessageType.WorldState;
 
-    public WorldState(int currentTick, int snapshotTick, World world, CommandList commands)
+    public WorldStateResponse(int currentTick, int snapshotTick, World world, CommandList commands)
     {
         CurrentTick = currentTick;
         SnapshotTick = snapshotTick;
@@ -29,9 +29,9 @@ public class WorldState : ISerializable<WorldState>, IServerMessageable
         Commands.Encode(writer);
     }
 
-    public static WorldState Decode(BinaryReader reader)
+    public static WorldStateResponse Decode(BinaryReader reader)
     {
-        return new WorldState(
+        return new WorldStateResponse(
             reader.ReadInt32(),
             reader.ReadInt32(),
             World.Decode(reader),

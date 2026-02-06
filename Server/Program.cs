@@ -5,6 +5,7 @@ using Shared.Math;
 using Shared.Network;
 using System.Net.Sockets;
 using Shared.Network.Messages;
+using System.Diagnostics;
 
 namespace Server;
 
@@ -46,21 +47,6 @@ class Program
         var world = new World(grid, entities);
         worldManager = new WorldManager(world);
 
-        // for(int i = 0; i < 100; i++)
-        // {
-        //     Int2 to;
-        //     if(i % 2 == 0)
-        //     {
-        //         to = new(2, 0);
-        //     } else
-        //     {
-        //         to = new(3, 0);
-        //     }
-        //     worldManager.CommandQueue.Enqueue(
-        //         new MoveCommand(0, i * 50, entity.Id, to)
-        //     );
-        // }
-
         GameServer server = new(3000);
         server.OnConnect += (client) =>
         {
@@ -79,27 +65,30 @@ class Program
 
     static async void OnMessage(Connection client, byte[] bytes)
     {
-        var requestType = (ClientMessageType) bytes[0];
+        Debug.Assert(worldManager != null);
 
-        Console.WriteLine(requestType);
+        var requestType = (ClientMessageType) bytes[0];
 
         switch (requestType)
         {
             case ClientMessageType.Join:
-                var loginReq = new ClientMessage<Login>(bytes);
+                var loginReq = new ClientMessage<JoinRequest>(bytes);
 
                 int playerId = nextId++;
                 var player = new Player(playerId, loginReq.Content.Name);
-                await client.SendAsync(ServerMessage<Player>.Generate(player));
-                worldManager?.AddPlayer(client, player);
+                worldManager.AddPlayer(client, player);
+                _ = client.SendAsync(ServerMessage<Player>.Generate(player));
                 break;
             case ClientMessageType.WorldData:
-                await client.SendAsync(ServerMessage<WorldState>.Generate(worldManager.GetWorldData()));
+                _ = client.SendAsync(ServerMessage<WorldStateResponse>.Generate(worldManager.GetWorldData()));
                 break;
             case ClientMessageType.Move:
                 var moveIntent = new ClientMessage<MoveCommand>(bytes).Content;
-                Console.WriteLine($"Received a move intent to tile {moveIntent.To}");
-                worldManager?.ReceiveMovement(client, moveIntent);
+                worldManager?.ProcessMovement(client, moveIntent);
+                break;
+            case ClientMessageType.Ping:
+                var ping = new ClientMessage<ClientPing>(bytes).Content;
+                worldManager.ProcessPing(client, ping);
                 break;
         }
     }

@@ -16,8 +16,6 @@ public partial class GridView : Node
     public void Initialize(GameContext gameContext)
     {
         _grid = gameContext.World.Grid;
-
-        GD.Print("Rendering...");
         Render();
     }
     private void Render()
@@ -33,12 +31,13 @@ public partial class GridView : Node
         {
             var instance = TileScene.Instantiate<TileView>();
             AddChild(instance);
-            instance.Position = Coords.ToHexCenter(tile.Pos, Globals.TileRadius);
+            instance.Position = Coords.ToHexCenter(tile.Pos);
             instance.Name = $"{tile.Pos}";
             instance.Initialize(tile);
 
             instance.Clicked += OnTileClicked;
         }
+        GD.Print("HELLO!");
     }
 
     public void OnTileClicked(int x, int y)

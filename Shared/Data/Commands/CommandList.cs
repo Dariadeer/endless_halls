@@ -30,7 +30,7 @@ public class CommandList : LinkedList<ICommand>, ISerializable<CommandList>
             ICommand command = commandType switch
             {
                 CommandType.MoveCommand => MoveCommand.Decode(reader),
-                CommandType.SummonCommand => SummonCommand.Decode(reader),
+                CommandType.AppearCommand => AppearCommand.Decode(reader),
                 _ => throw new ArgumentException("Unrecognized command")
             };
 
@@ -52,8 +52,8 @@ public class CommandList : LinkedList<ICommand>, ISerializable<CommandList>
                     writer.Write((byte) CommandType.MoveCommand);
                     mc.Encode(writer);
                     break;
-                case SummonCommand sc:
-                    writer.Write((byte) CommandType.SummonCommand);
+                case AppearCommand sc:
+                    writer.Write((byte) CommandType.AppearCommand);
                     sc.Encode(writer);
                     break;
                 default:
