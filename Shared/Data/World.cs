@@ -8,7 +8,8 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     public readonly TileMap Grid;
     public readonly EntityMap Entities;
     public readonly TileMapPathfinder Pathfinder;
-    public Action<Entity>? EntitySummoned;
+    public Action<Entity>? EntityAppeared;
+    public Action<int>? EntityDisappeared;
 
     public static ServerMessageType MessageType => ServerMessageType.WorldState;
 
@@ -22,7 +23,13 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     public void SummonEntity(Entity entity)
     {
         Entities.AddEntity(entity);
-        EntitySummoned?.Invoke(entity);
+        EntityAppeared?.Invoke(entity);
+    }
+
+    public void RemoveEntity(Entity entity)
+    {
+        Entities.Remove(entity.Id);
+        entity.Disappear();
     }
 
     public void Advance(int tick)

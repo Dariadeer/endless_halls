@@ -14,14 +14,16 @@ public class WorldManager
     public Queue<ICommand> CommandQueue = [];
     public Dictionary<Connection, Player> Players = [];
     private Loop _loop;
-    public int CommandTickDelay = 0;
+    public int CommandTickDelay = 5;
     private readonly CancellationTokenSource _cts = new();
 
     public WorldManager(World world)
     {
-        _loop = new Loop(world);
-        _loop.Logger = new ServerLogger();
-        _loop.SnapshotQuantity = 2;
+        _loop = new Loop(world)
+        {
+            Logger = new ServerLogger(),
+            SnapshotQuantity = 2
+        };
     }
 
     public async Task StartLoop()
@@ -58,10 +60,16 @@ public class WorldManager
         {
             switch (command) {
                 case MoveCommand move:
-                    connection.SendAsync(ServerMessage<MoveCommand>.Generate(move));
+                    _ = connection.SendAsync(ServerMessage<MoveCommand>.Generate(move));
                     break;
-                case AppearCommand summon:
-                    connection.SendAsync(ServerMessage<AppearCommand>.Generate(summon));
+                case AppearCommand appear:
+                    _ = connection.SendAsync(ServerMessage<AppearCommand>.Generate(appear));
+                    break;
+                case HaltCommand halt:
+                    _ = connection.SendAsync(ServerMessage<HaltCommand>.Generate(halt));
+                    break;
+                case DisappearCommand disappear:
+                    _ = connection.SendAsync(ServerMessage<DisappearCommand>.Generate(disappear));
                     break;
             }
         }
@@ -88,29 +96,35 @@ public class WorldManager
 
     public void RemovePlayer(Connection connection)
     {
+        var player = Players[connection];
         Players.Remove(connection);
+        foreach(var entity in _loop.World.Entities.Values)
+        {
+            if(entity.TeamId != player.Id) continue;
+                var disappearance = new DisappearCommand(4, GetDelayedTick(), entity.Id);
+                _loop.InsertCommand(disappearance);
+                Broadcast(disappearance);
+        }
     }
 
     public void ProcessMovement(Connection connection, MoveCommand move)
     {
         var player = Players[connection];
         var entity = _loop.World.Entities[move.EntityId];
-        if(player.Id == entity.TeamId)
-        {
-            var serverMove = new MoveCommand(2, move.Tick, entity.Id, move.To);
-            _loop.InsertCommand(serverMove);
-            Broadcast(serverMove);
-        }
+        if(player.Id != entity.TeamId) return;
+        var serverMove = new MoveCommand(2, GetDelayedTick(), entity.Id, move.To);
+        _loop.InsertCommand(serverMove);
+        Broadcast(serverMove);
     }
 
-    public void ProcessPing(Connection client, ClientPing ping)
+    public void ProcessHalt(Connection conenction, HaltCommand halt)
     {
-        _ = client.SendAsync(ServerMessage<ServerPing>.Generate(new ServerPing
-                {
-                    ClientPing = ping,
-                    GlobalTick = _loop.Tick,
-                    GlobalTimeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-                }));
+        var player = Players[conenction];
+        var entity = _loop.World.Entities[halt.EntityId];
+        if(player.Id != entity.TeamId) return;
+        var serverHalt = new HaltCommand(3, GetDelayedTick(), entity.Id);
+        _loop.InsertCommand(serverHalt);
+        Broadcast(serverHalt);
     }
 
     private int GetDelayedTick()

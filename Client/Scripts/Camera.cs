@@ -1,6 +1,7 @@
 using System;
+using Client.Scripts.Data;
 using Godot;
-using Shared.Math;
+using Shared.MyMath;
 
 namespace Client.Scripts;
 
@@ -18,6 +19,9 @@ public partial class Camera : Camera2D
 	[Signal]
     public delegate void TileClickedEventHandler(int x, int y);
 
+    public int? EntityIdFollowed = null;
+    public int? EntityTeamIdFollowed = null;
+    public Node2D EntityToFollow = null;
     private float _targetZoom = 1;
     private bool _mouseDown;
     private Vector2 _mouseDownLocalPos;
@@ -25,13 +29,24 @@ public partial class Camera : Camera2D
     private Vector2 _mouseDownGlobalPos;
     private bool _mouseMoved;
 
+    private GameContext _context;
+
+    public void Initialize(GameContext context)
+    {
+        _context = context;
+    }
     public override void _Process(double delta)
     {
         var fDelta = (float) delta;
 
-        var moveInput = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        var translation = moveInput * fDelta * MoveSpeed;
-        Position += translation;
+        // var moveInput = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        // var translation = moveInput * fDelta * MoveSpeed;
+        // Position += translation;
+
+        if(EntityToFollow != null)
+        {
+            Position = Position.Lerp(EntityToFollow.Position, 0.1f);
+        }
 
         float zoomTransition = fDelta * ZoomTransitionSpeed;
         float zoom = Zoom.X * (1 - zoomTransition) + _targetZoom * zoomTransition;

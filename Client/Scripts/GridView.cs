@@ -1,4 +1,5 @@
 using Client.Scripts.Config;
+using Client.Scripts.Data;
 using Godot;
 using Shared.Data;
 
@@ -16,7 +17,7 @@ public partial class GridView : Node
     public void Initialize(GameContext gameContext)
     {
         _grid = gameContext.World.Grid;
-        Render();
+        CallDeferred("Render");
     }
     private void Render()
     {

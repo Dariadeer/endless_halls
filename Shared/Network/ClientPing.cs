@@ -4,8 +4,8 @@ namespace Shared.Network;
 
 public class ClientPing : ISerializable<ClientPing>, IClientMessageable
 {
-    public int LocalTick;
-    public long LocalTime;
+    public int Tick;
+    public byte Id;
 
     public static ClientMessageType MessageType => ClientMessageType.Ping;
 
@@ -13,14 +13,14 @@ public class ClientPing : ISerializable<ClientPing>, IClientMessageable
     {
         return new ClientPing
         {
-           LocalTick = reader.ReadInt32(),
-           LocalTime = reader.ReadInt64() 
+           Tick = reader.ReadInt32(),
+           Id = reader.ReadByte() 
         };
     }
 
     public void Encode(BinaryWriter writer)
     {
-        writer.Write(LocalTick);
-        writer.Write(LocalTime);
+        writer.Write(Tick);
+        writer.Write(Id);
     }
 }

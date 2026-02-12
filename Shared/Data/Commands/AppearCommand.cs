@@ -1,6 +1,6 @@
 using Shared.Network;
 using Shared.Data;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network.Messages;
 
 namespace Shared.Data.Commands;
@@ -12,21 +12,21 @@ public class AppearCommand : ICommand, ISerializable<AppearCommand>, IServerMess
 
     public static ServerMessageType MessageType => ServerMessageType.Appearance;
 
-    public readonly Entity Summonee;
+    public readonly Entity Entity;
     public readonly Int2 To;
 
     public AppearCommand(int id, int tick, Entity summonee)
     {
         Id = id;
         Tick = tick;
-        Summonee = summonee;
+        Entity = summonee;
     }
 
     public void Encode(BinaryWriter writer)
     {
         writer.Write(Id);
         writer.Write(Tick);
-        Summonee.Encode(writer);
+        Entity.Encode(writer);
         To.Encode(writer);
     }
 

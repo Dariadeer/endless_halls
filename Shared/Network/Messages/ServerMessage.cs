@@ -26,8 +26,6 @@ public class ServerMessage<T> where T : ISerializable<T>, IServerMessageable
 
         byte[] arr = stream.ToArray();
 
-        Console.WriteLine($"{arr.Length} bytes were sent to the client");
-
         return stream.ToArray();
     }
 

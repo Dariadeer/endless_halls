@@ -2,13 +2,13 @@ namespace Shared.Logic;
 
 using Shared.Data;
 using Shared.Data.Commands;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network;
 using Shared.Utils;
 
 public class Loop
 {
-    public static readonly int TICK_DURATION_MS = 20;
+    public static readonly long TICK_DURATION_MS = 20;
     public static readonly double TICK_DURATION_S = 0.02;
 
     public int SnapshotInterval = 50;
@@ -114,7 +114,7 @@ public class Loop
 
         if(!_commands.ContainsKey(tick))
         {
-            _commands.Add(tick, new CommandList());
+            _commands.Add(tick, []);
         }
         var commandsAtTick = _commands[tick];
         commandsAtTick.Add(command);
@@ -166,32 +166,46 @@ public class Loop
 
     public void ApplyCommand(ICommand command)
     {
-        Logger?.Log("Applying Command " + command.Id + " at tick " + Tick);
-        Entity entity;
+        Logger?.Log("Applying " + command + " " + command.Id + " at tick " + Tick);
+        Entity? entity;
         switch (command)
         {
             case MoveCommand move:
-                entity = World.Entities[move.EntityId];
+                entity = FetchEntity(move.EntityId);
+                if(entity == null) break;
                 var lastPos = entity.Path.LastOrDefault(entity.Movement.State == MovementState.Idle ? entity.Pos : entity.Movement.To);
-                LinkedList<Int2> steps;
-                try
-                {
-                    steps = World.Pathfinder.BFS(lastPos, move.To);
-                }
-                catch (PathNotFoundException)
-                {
-                    steps = [];
-                }
+                var steps = World.Pathfinder.AStar(lastPos, move.To);
                 entity.AppendPath(steps, Tick);
                 Logger?.Log($"{steps.Count} tiles to travel, {entity.Path.Count} steps in total!");
                 break;
-            case AppearCommand summon:
-                entity = summon.Summonee.Copy();
+            case AppearCommand appear:
+                entity = appear.Entity.Copy();
                 World.SummonEntity(entity);
+                break;
+            case HaltCommand halt:
+                entity = FetchEntity(halt.EntityId);
+                if(entity == null) break;
+                entity.ClearPath();
+                break;
+            case DisappearCommand disappear:
+                entity = FetchEntity(disappear.EntityId);
+                if(entity == null) break;
+                World.RemoveEntity(entity);
                 break;
             default:
                 Logger?.Log("Unrecognized command!");
                 break;
+        }
+    }
+
+    public Entity? FetchEntity(int entityId)
+    {
+        if(World.Entities.TryGetValue(entityId, out var entity))
+        {
+            return entity;
+        } else
+        {
+            return null;
         }
     }
 

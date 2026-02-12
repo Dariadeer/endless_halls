@@ -1,10 +1,13 @@
-- [x] Basic
+- [ ] Basic
 	- [x] Add an ability to chain movements
 	- [x] Add *deterministic* pathfinding
 	- [x] Add movement lines
+	- [ ] Reimplement grid view using Godot's tile map scene
+		- [ ] Find/create a suitable tile set
 - [ ] Netcode
 	- [ ] Add disconnect events
-	- [ ] Add move cancellation requests/events
-	- [ ] Add ping events and delay adjustment
-	- [ ] Implement move queue serialisation
-	- [ ] Implement message fragmentation for when too much data is to be sent
+	- [x] Add move cancellation requests/events
+	- [x] Add ping events and delay adjustment
+	- [x] Implement move queue serialisation
+	- [x] Implement message fragmentation for when too much data is to be sent
+	- [ ] Add occasional world state hash checks with a possible re-sync procedure.

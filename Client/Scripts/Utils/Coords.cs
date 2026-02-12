@@ -4,7 +4,7 @@ using System;
 using Client.Scripts.Config;
 using Godot;
 using Shared.Data;
-using Shared.Math;
+using Shared.MyMath;
 
 public class Coords
 {
@@ -16,6 +16,10 @@ public class Coords
             (1 + _sin30) * Globals.TileRadius * hex.X,
             _sin60 * (hex.X - 2 * hex.Y) * Globals.TileRadius
         );
+        // return new Vector2(
+        //     _sin60 * (hex.Y - 2 * hex.X) * Globals.TileRadius,
+        //     (1 + _sin30) * Globals.TileRadius * hex.Y
+        // );
     }
 
     public static Int2 ToHexCoords(Vector2 pos, float radius)

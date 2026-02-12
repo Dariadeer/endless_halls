@@ -1,7 +1,7 @@
 ﻿using Shared.Data;
 using Shared.Logic;
 using Shared.Data.Commands;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network;
 using Tests.Utils;
 

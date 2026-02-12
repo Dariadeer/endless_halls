@@ -9,5 +9,7 @@ public enum ServerMessageType : byte
     WorldState = 2,
     PlayerData = 3,
     Movement = 4,
-    Appearance = 5
+    Appearance = 5,
+    Halt = 6,
+    Disappearance = 7
 }

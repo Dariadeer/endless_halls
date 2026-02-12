@@ -1,7 +1,7 @@
 ﻿using Shared.Data;
 using Shared.Logic;
 using Shared.Data.Commands;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network;
 using System.Net.Sockets;
 using Shared.Network.Messages;
@@ -23,31 +23,12 @@ class Program
         }
 
         var grid = new TileMap();
-        grid.Generate(5);
-        var entities = new EntityMap();
-        entities.AddEntity(
-            new Entity(-1)
-            {
-                Pos = new Int2(3, 0),
-                TeamId = -1,
-                Movement = new Movement()
-            }
-        );
-        entities.AddEntity(
-            new Entity(-2)
-            {
-                Pos = new Int2(-3, 0),
-                TeamId = -1,
-                Movement = new Movement()
-            }
-        );
-
-        var entity = entities[-1];
+        grid.Generate(10);
         
-        var world = new World(grid, entities);
+        var world = new World(grid, []);
         worldManager = new WorldManager(world);
 
-        GameServer server = new(3000);
+        GameServer server = new(port);
         server.OnConnect += (client) =>
         {
             Console.WriteLine($"Client connected!");
@@ -86,9 +67,20 @@ class Program
                 var moveIntent = new ClientMessage<MoveCommand>(bytes).Content;
                 worldManager?.ProcessMovement(client, moveIntent);
                 break;
+            case ClientMessageType.Halt:
+                var halt = new ClientMessage<HaltCommand>(bytes).Content;
+                worldManager.ProcessHalt(client, halt);
+                break;
             case ClientMessageType.Ping:
                 var ping = new ClientMessage<ClientPing>(bytes).Content;
-                worldManager.ProcessPing(client, ping);
+                // Console.WriteLine($"{DateTimeOffset.Now.ToUnixTimeMilliseconds()} - ping {ping.Id} received");
+                _ = client.SendAsync(ServerMessage<ServerPing>.Generate(
+                    new ServerPing
+                    {
+                        Id = ping.Id
+                    }
+                ));
+                // Console.WriteLine($"{DateTimeOffset.Now.ToUnixTimeMilliseconds()} - ping {ping.Id} received");
                 break;
         }
     }

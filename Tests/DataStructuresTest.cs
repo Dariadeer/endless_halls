@@ -9,7 +9,7 @@ public class DataStructuresTest
     {
         var cmdl = new CommandList();
 
-        cmdl.Add(new MoveCommand(0, 0, 0, new Shared.Math.Int2(0, 1)));
+        cmdl.Add(new MoveCommand(0, 0, 0, new Shared.MyMath.Int2(0, 1)));
 
         Assert.Single(cmdl.GetAll());
     }

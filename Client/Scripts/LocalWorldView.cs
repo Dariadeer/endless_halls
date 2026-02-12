@@ -7,8 +7,10 @@ using Godot;
 using Shared.Data;
 using Shared.Logic;
 using Shared.Data.Commands;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Utils;
+using Client.Scripts.Data;
+
 public partial class LocalWorldView : Node
 {
 	private Loop _loop;
@@ -16,6 +18,8 @@ public partial class LocalWorldView : Node
 	public GridView GridView;
 	[Export]
 	public EntityManager EntityManager;
+	[Export]
+	public Camera Camera;
 	private GameContext _context;
 
 	public void Initialize()
@@ -46,6 +50,8 @@ public partial class LocalWorldView : Node
 			}
 		));
 
+		Camera.EntityIdFollowed = 0;
+
 		GridView.TileClicked += OnTileClicked;
 	}
 
@@ -55,7 +61,8 @@ public partial class LocalWorldView : Node
 			World = world,
 			CurrentTick = _loop.Tick,
 			TimeStart = _context != null ? _context.TimeStart : DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-			LastTickProcessed = _loop.Tick
+			LastTickProcessed = _loop.Tick,
+			Camera = Camera
 		};
 		
 
@@ -72,7 +79,6 @@ public partial class LocalWorldView : Node
 		while(now > _context.CalculateTickTime(_context.CurrentTick))
 		{
 			_loop.Update();
-
 			_context.CurrentTick++;
 		}
 	}
@@ -88,10 +94,23 @@ public partial class LocalWorldView : Node
 
     public override void _Input(InputEvent @event)
     {
-        if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Space)
+        if(@event is InputEventKey keyEvent && keyEvent.Pressed)
 		{
-			_loop.RecoverState(0);
-			_context.TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+			
+			switch (keyEvent.Keycode)
+			{
+				case Key.Space:
+					_loop.RecoverState(0);
+					_context.TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+					break;
+				// case Key.Escape:
+				// 	await _client.DisconnectAsync();
+				// 	Main.GoToMenu(this);
+				// 	break;
+				case Key.E:
+					_loop.InsertCommand(new HaltCommand(0, _loop.Tick + 1, 0));
+					break;
+			}
 		}
     }
 }

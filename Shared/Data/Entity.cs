@@ -1,5 +1,5 @@
 using Shared.Date;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network;
 
 namespace Shared.Data;
@@ -12,6 +12,7 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
     public Movement Movement = Movement.Idle;
     public MoveQueue Path = new();
     public Action? PathUpdated;
+    public Action? Disappeared;
 
     public Entity(int id = 0)
     {
@@ -38,6 +39,12 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
                 Path.Enqueue(to);
             }
         }
+        PathUpdated?.Invoke();
+    }
+
+    public void ClearPath()
+    {
+        Path.Clear();
         PathUpdated?.Invoke();
     }
 
@@ -84,5 +91,10 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
             Movement = Movement.Decode(reader),
             Path = MoveQueue.Decode(reader)
         };
+    }
+
+    public void Disappear()
+    {
+        Disappeared?.Invoke();
     }
 }

@@ -4,9 +4,7 @@ namespace Shared.Network;
 
 public class ServerPing : ISerializable<ServerPing>, IServerMessageable
 {
-    public required ClientPing ClientPing;
-    public int GlobalTick;
-    public long GlobalTimeMs;
+    public byte Id;
 
     public static ServerMessageType MessageType => ServerMessageType.Ping;
 
@@ -14,16 +12,12 @@ public class ServerPing : ISerializable<ServerPing>, IServerMessageable
     {
         return new ServerPing
         {
-            ClientPing = ClientPing.Decode(reader),
-            GlobalTick = reader.ReadInt32(),
-            GlobalTimeMs = reader.ReadInt64()
+            Id = reader.ReadByte()
         };
     }
 
     public void Encode(BinaryWriter writer)
     {
-        ClientPing.Encode(writer);
-        writer.Write(GlobalTick);
-        writer.Write(GlobalTimeMs);
+        writer.Write(Id);
     }
 }

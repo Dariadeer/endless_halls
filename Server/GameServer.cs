@@ -38,6 +38,7 @@ public class GameServer
                     break;
                 }
 
+                tcpClient.NoDelay = true;
                 var connection = new Connection(tcpClient);
                 OnConnect?.Invoke(connection);
 

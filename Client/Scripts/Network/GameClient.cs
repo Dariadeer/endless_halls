@@ -1,6 +1,7 @@
 namespace Client.Scripts.Network;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +14,7 @@ public sealed class GameClient : IDisposable
     private readonly TcpClient _client = new();
     private readonly CancellationTokenSource _cts = new();
     private Task _receiveTask;
+    private readonly List<byte> _recvBuffer = [];
 
     public event Action OnConnect;
     public event Action<byte[]> OnMessage;
@@ -20,10 +22,11 @@ public sealed class GameClient : IDisposable
 
     public async Task ConnectAsync(string host, int port)
     {
+        _client.NoDelay = true;
         await _client.ConnectAsync(host, port);
         OnConnect?.Invoke();
 
-        _receiveTask = ReceiveLoopAsync(_cts.Token);
+        _receiveTask = Task.Run(() => ReceiveLoopAsync(_cts.Token));
     }
 
     private async Task ReceiveLoopAsync(CancellationToken ct)
@@ -35,25 +38,54 @@ public sealed class GameClient : IDisposable
 
             while (!ct.IsCancellationRequested)
             {
-                int bytes = await stream.ReadAsync(buffer, ct);
-                if (bytes == 0)
+                int bytesRead = await stream.ReadAsync(buffer, ct);
+                if (bytesRead == 0)
                     break;
 
-                OnMessage?.Invoke(buffer[..bytes]);
+                // Append received bytes
+                _recvBuffer.AddRange(buffer.AsSpan(0, bytesRead).ToArray());
+
+                // Try to extract as many complete messages as possible
+                while (TryReadMessage(out var message))
+                {
+                    OnMessage?.Invoke(message);
+                }
             }
         }
         catch (OperationCanceledException)
         {
-            // expected on disconnect
         }
         catch (IOException)
         {
-            // socket closed
         }
         finally
         {
             OnDisconnect?.Invoke();
         }
+    }
+
+    private bool TryReadMessage(out byte[] message)
+    {
+        message = null;
+
+        // Need at least 4 bytes for length
+        if (_recvBuffer.Count < 4)
+            return false;
+
+        int length = BitConverter.ToInt32(_recvBuffer.ToArray(), 0);
+
+        // Optional sanity check
+        if (length <= 0 || length > 10_000_000)
+            throw new InvalidDataException("Invalid message length");
+
+        // Wait until full payload is available
+        if (_recvBuffer.Count < 4 + length)
+            return false;
+
+        message = _recvBuffer.GetRange(4, length).ToArray();
+        _recvBuffer.RemoveRange(0, 4 + length);
+
+        return true;
     }
 
     public async Task DisconnectAsync()

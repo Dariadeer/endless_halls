@@ -1,4 +1,5 @@
 using Shared.Network;
+using Shared.Utils;
 
 namespace Shared.Data.Commands;
 
@@ -56,8 +57,17 @@ public class CommandList : LinkedList<ICommand>, ISerializable<CommandList>
                     writer.Write((byte) CommandType.AppearCommand);
                     sc.Encode(writer);
                     break;
+                case DisappearCommand dc:
+                    writer.Write((byte) CommandType.AppearCommand);
+                    dc.Encode(writer);
+                    break;
+                case HaltCommand hc:
+                    writer.Write((byte) CommandType.AppearCommand);
+                    hc.Encode(writer);
+                    break;
                 default:
-                    throw new ArgumentException("Unrecognized command");
+                    GlobalLogger.Instance.Log($"Unrecognized command in Command List: {command}");
+                    break;
             }
         }
     }

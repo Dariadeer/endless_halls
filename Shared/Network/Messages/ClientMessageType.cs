@@ -7,5 +7,6 @@ public enum ClientMessageType : byte
     Ping = 0,
     Move = 1,
     WorldData = 2,
-    Join = 3
+    Join = 3,
+    Halt = 4
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dewuujy0vl83h"]
+[gd_scene format=3 uid="uid://dewuujy0vl83h"]
 
 [ext_resource type="Script" uid="uid://breg2dkml4kqv" path="res://Scripts/LocalWorldView.cs" id="1_j0p05"]
 [ext_resource type="Script" uid="uid://db827q03ev6oj" path="res://Scripts/Camera.cs" id="2_5nsto"]
@@ -7,12 +7,13 @@
 [ext_resource type="Script" uid="uid://du53aqr3qoapq" path="res://Scripts/EntityManager.cs" id="5_p70al"]
 [ext_resource type="PackedScene" uid="uid://dpdqvqohm8y4b" path="res://Scenes/Entity.tscn" id="6_45d1s"]
 
-[node name="LocalWorld" type="Node2D" node_paths=PackedStringArray("GridView", "EntityManager")]
+[node name="LocalWorld" type="Node2D" unique_id=1105512281 node_paths=PackedStringArray("GridView", "EntityManager", "Camera")]
 script = ExtResource("1_j0p05")
 GridView = NodePath("Grid")
 EntityManager = NodePath("EntityManager")
+Camera = NodePath("Camera")
 
-[node name="Camera" type="Camera2D" parent="."]
+[node name="Camera" type="Camera2D" parent="." unique_id=1587945356]
 limit_enabled = false
 drag_left_margin = 0.0
 drag_top_margin = 0.0
@@ -24,10 +25,10 @@ ZoomSpeed = 0.15
 ZoomTransitionSpeed = 10.0
 MagnifyZoomSpeed = 10.0
 
-[node name="Grid" type="Node2D" parent="."]
+[node name="Grid" type="Node2D" parent="." unique_id=543420422]
 script = ExtResource("2_gjpho")
 TileScene = ExtResource("4_gjpho")
 
-[node name="EntityManager" type="Node2D" parent="."]
+[node name="EntityManager" type="Node2D" parent="." unique_id=1925497656]
 script = ExtResource("5_p70al")
 EntityScene = ExtResource("6_45d1s")

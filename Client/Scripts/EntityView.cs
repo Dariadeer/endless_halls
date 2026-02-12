@@ -1,8 +1,9 @@
 using System;
 using Client.Scripts.Config;
+using Client.Scripts.Data;
 using Godot;
 using Shared.Data;
-using Shared.Math;
+using Shared.MyMath;
 
 namespace Client.Scripts;
 
@@ -22,6 +23,7 @@ public partial class EntityView : Node2D
         _context = context;
         _entity = entity;
         _entity.PathUpdated += OnPathUpdated;
+        _entity.Disappeared += OnDisappeared;
         Position = Coords.ToHexCenter(entity.Pos);
     }
 
@@ -70,5 +72,10 @@ public partial class EntityView : Node2D
             }
         }
         catch { }
+    }
+
+    public void OnDisappeared()
+    {
+        QueueFree();
     }
 }

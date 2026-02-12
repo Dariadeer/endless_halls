@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Client.Scripts.Data;
 using Godot;
 using Shared.Data;
 
@@ -13,33 +14,40 @@ public partial class EntityManager : Node2D
     public void Initialize(GameContext context)
     {
         _context = context;
-        _context.World.EntitySummoned += OnEntitySummoned;
+        _context.World.EntityAppeared += OnEntitySummoned;
 
-        Render(context.World.Entities);
+        CallDeferred("Render");
     }
 
-    public void Render(EntityMap entityMap)
+    public void Render()
     {
         foreach(var child in GetChildren())
         {
             child.QueueFree();
         }
         
-        foreach (var entity in entityMap.Values)
+        foreach (var entity in _context.World.Entities.Values)
         {
             CreateEntity(entity);
         }
     }
 
-    public void CreateEntity(Entity entity)
+    public EntityView CreateEntity(Entity entity)
     {
         var instance = EntityScene.Instantiate<EntityView>();
         instance.Initialize(_context, entity);
         AddChild(instance);
+
+        return instance;
     }
 
     public void OnEntitySummoned(Entity entity)
     {
-        CreateEntity(entity);
+        var entityView = CreateEntity(entity);
+        GD.Print($"{entity.Id}, {_context.Camera.EntityIdFollowed}");
+        if(entity.Id == _context.Camera.EntityIdFollowed || entity.TeamId == _context.Camera.EntityTeamIdFollowed)
+        {
+            _context.Camera.EntityToFollow = entityView;
+        }
     }
 }

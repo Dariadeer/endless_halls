@@ -1,5 +1,5 @@
 using Shared.Data;
-using Shared.Math;
+using Shared.MyMath;
 
 namespace Tests.Utils;
 

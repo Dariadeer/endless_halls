@@ -1,6 +1,6 @@
 using Shared.Network;
 
-namespace Shared.Math;
+namespace Shared.MyMath;
 
 public readonly struct Int2 : IEquatable<Int2>, ISerializable<Int2>
 {

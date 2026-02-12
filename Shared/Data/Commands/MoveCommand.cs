@@ -1,4 +1,4 @@
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Network;
 using Shared.Network.Messages;
 

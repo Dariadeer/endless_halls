@@ -7,13 +7,14 @@ using Godot;
 using Shared.Data;
 using Shared.Logic;
 using Shared.Data.Commands;
-using Shared.Math;
+using Shared.MyMath;
 using Shared.Utils;
 using System.Text.RegularExpressions;
 using Client.Scripts.Network;
 using Shared.Network;
 using Shared.Network.Messages;
 using System.Linq;
+using Client.Scripts.Data;
 
 public partial class RemoteWorldView : Node
 {
@@ -22,7 +23,9 @@ public partial class RemoteWorldView : Node
 	public GridView GridView;
 	[Export]
 	public EntityManager EntityManager;
-	public Main? Main;
+	[Export]
+	public Camera Camera;
+	public Main Main;
 
 	private GameContext _context;
 	private GameClient _client;
@@ -30,7 +33,9 @@ public partial class RemoteWorldView : Node
     private int _port;
 	private Player _player;
 	private Entity _entity;
-	private long _lastPingTime = 0;
+	private long _worldDataRequestTime = 0;
+	private PingManager _pingManager = new();
+	private long _currentDelay = 0;
 
     public override void _Ready()
     {
@@ -56,7 +61,7 @@ public partial class RemoteWorldView : Node
 		await _client.ConnectAsync(_host, _port);
 	}
 
-	public void LaunchWorldLoop(WorldStateResponse data)
+	public void LaunchWorldLoop(WorldStateResponse data, long delay)
 	{
 		_loop = new Loop(data.World, data.SnapshotTick)
         {
@@ -70,7 +75,9 @@ public partial class RemoteWorldView : Node
 			World = data.World,
 			CurrentTick = data.SnapshotTick,
 			TickStart = data.CurrentTick,
-			TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+			TimeStart = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+			Delay = delay,
+			Camera = Camera
 		};
 
 		_loop.WorldStateRecovered += OnWorldStateRecovered;
@@ -78,9 +85,19 @@ public partial class RemoteWorldView : Node
 
 		GridView.Initialize(_context);
 		EntityManager.Initialize(_context);
-		_context.World.EntitySummoned += OnEntitySummoned;
+		_context.World.EntityAppeared += OnEntitySummoned;
 
+		CallDeferred("LaunchProcess");
+	}
+
+	public void LaunchProcess()
+	{
 		SetProcess(true);
+	}
+
+	public void HaltProcess()
+	{
+		SetProcess(false);
 	}
 
 	public void OnWorldStateRecovered(World world)
@@ -90,7 +107,7 @@ public partial class RemoteWorldView : Node
 		
 		GridView.Initialize(_context);
 		EntityManager.Initialize(_context);
-		_context.World.EntitySummoned += OnEntitySummoned;
+		_context.World.EntityAppeared += OnEntitySummoned;
 	}
 
 	
@@ -105,33 +122,42 @@ public partial class RemoteWorldView : Node
 			_context.CurrentTick++;
 		}
 
-		if(now - _lastPingTime > 1000)
+		if(now - _pingManager.lastPingTime > PingManager.PING_INTERVAL)
 		{
-			_client.SendAsync(ClientMessage<ClientPing>.Generate(new ClientPing
-			{
-				LocalTick = _loop.Tick,
-				LocalTime = now
-			}));
+			_ = _client.SendAsync(ClientMessage<ClientPing>.Generate(
+				_pingManager.Make(_loop.Tick)
+			));
 
-			_lastPingTime = now;
+			_pingManager.lastPingTime = now;
 		}
 	}
 
 	public async void OnTileClicked(int x, int y)
 	{
-		GD.Print($"Tile was clicked at {new Int2(x, y)}");
+		GD.Print($"Tile was clicked at {new Int2(x, y)} on tick {_loop.Tick}");
 
 		var move = new MoveCommand(-1, _loop.Tick, _entity.Id, new Int2(x, y));
 
-		await _client.SendAsync(ClientMessage<MoveCommand>.Generate(move));
+		_ = _client.SendAsync(ClientMessage<MoveCommand>.Generate(move));
 	}
 
-    public override async void _Input(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
-        if(@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Escape)
+		if(@event is InputEventKey keyEvent && keyEvent.Pressed)
 		{
-			await _client.DisconnectAsync();
-			Main.GoToMenu(this);
+			switch (keyEvent.Keycode)
+			{
+				case Key.Escape:
+					_ = _client.DisconnectAsync();
+					Main.GoToMenu(this);
+					break; 
+				case Key.E:
+					GD.Print("Halting!");
+					var haltCommand = new HaltCommand(0, 0, _entity.Id);
+					_ = _client.SendAsync(ClientMessage<HaltCommand>.Generate(haltCommand));
+					break;
+			}
+			
 		}
     }
 
@@ -148,8 +174,9 @@ public partial class RemoteWorldView : Node
 		_client.SendAsync(ClientMessage<JoinRequest>.Generate(new JoinRequest("Anton")));
 	}
 
-	public async void OnServerMessage(byte[] bytes)
+	public void OnServerMessage(byte[] bytes)
 	{
+		// GD.Print($"{DateTimeOffset.Now.ToUnixTimeMilliseconds()} – message received");
 		// GD.Print($"{bytes.Length} bytes received");
 		var responseType = (ServerMessageType) bytes[0];
 		// GD.Print("Server Message Type: " + responseType);
@@ -158,10 +185,13 @@ public partial class RemoteWorldView : Node
 			case ServerMessageType.PlayerData:
 				var playerDataMsg = new ServerMessage<Player>(bytes);
 				_player = playerDataMsg.Content;
+				Camera.EntityIdFollowed = _player.Id;
 				GD.Print($"Welcome, player \"{_player.Name}\" with ID {_player.Id}");
-				await _client.SendAsync(ClientMessage<WorldDataRequest>.Generate(new WorldDataRequest()));
+				_ = _client.SendAsync(ClientMessage<WorldDataRequest>.Generate(new WorldDataRequest()));
+				_worldDataRequestTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 				break;
 			case ServerMessageType.WorldState:
+				var delay = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _worldDataRequestTime;
 				var worldDataMsg = new ServerMessage<WorldStateResponse>(bytes);
 				var worldData = worldDataMsg.Content;
 				var world = worldData.World;
@@ -170,22 +200,30 @@ public partial class RemoteWorldView : Node
 					_entity = world.Entities.First((KeyValuePair<int, Entity> pair) => pair.Value.TeamId == _player.Id).Value;
 				} catch(Exception) {}
 
-				LaunchWorldLoop(worldData);
+				LaunchWorldLoop(worldData, delay);
 
 				GD.Print($"Joined a world with {world.Grid.Count} tiles, {world.Entities.Count} entities and {worldData.Commands.Count} commands!");
 				break;
 			case ServerMessageType.Movement:
-				var moveCmdMsg = new ServerMessage<MoveCommand>(bytes);
-				_loop.InsertCommand(moveCmdMsg.Content);
+				var movement = new ServerMessage<MoveCommand>(bytes).Content;
+				_loop.InsertCommand(movement);
 				break;
 			case ServerMessageType.Appearance:
-				var summonCmdMsg = new ServerMessage<AppearCommand>(bytes);
-				// GD.Print("Summoning entity " + summonCmdMsg.Content.Summonee.Id);
-				_loop.InsertCommand(summonCmdMsg.Content);
+				var appearance = new ServerMessage<AppearCommand>(bytes).Content;
+				_loop.InsertCommand(appearance);
+				break;
+			case  ServerMessageType.Halt:
+				var halt = new ServerMessage<HaltCommand>(bytes).Content;
+				_loop.InsertCommand(halt);
 				break;
 			case ServerMessageType.Ping:
 				var ping = new ServerMessage<ServerPing>(bytes).Content;
-				GD.Print($"Ping: {DateTimeOffset.Now.ToUnixTimeMilliseconds() - ping.ClientPing.LocalTime}");
+				_currentDelay = _pingManager.GetDelay(ping);
+				// GD.Print($"Ping: {_pingManager.GetDelay(ping)}");
+				break;
+			case ServerMessageType.Disappearance:
+				var disappearance = new ServerMessage<DisappearCommand>(bytes).Content;
+				_loop.InsertCommand(disappearance);
 				break;
 			default:
 				GD.Print($"Couldn't recognize type of this message ({responseType})");
@@ -195,8 +233,13 @@ public partial class RemoteWorldView : Node
 
 	public void OnServerDisconnect()
 	{
-		SetProcess(false);
 		GD.Print("Server disconnected!");
+		CallDeferred("GoToMenu");
+	}
+
+	public void GoToMenu()
+	{
+		SetProcess(false);
 		if(Main != null)
 		{
 			Main.GoToMenu(this);
