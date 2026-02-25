@@ -14,8 +14,8 @@ public readonly struct Int2 : IEquatable<Int2>, ISerializable<Int2>
     }
 
     public static readonly Int2 Zero = new(0, 0);
-    public static readonly Int2 Up = new(0, -1);
-    public static readonly Int2 Down = new(0, 1);
+    public static readonly Int2 Up = new(0, 1);
+    public static readonly Int2 Down = new(0, -1);
     public static readonly Int2 Left = new(-1, 0);
     public static readonly Int2 Right = new(1, 0);
 

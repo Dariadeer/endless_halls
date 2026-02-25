@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://cb8ig4mjex1cp"]
+
+[ext_resource type="Script" uid="uid://c6pdae63o6ouu" path="res://Scripts/RuneSlotView.cs" id="1_upeg3"]
+
+[node name="RuneSlot" type="Node2D" unique_id=1316237300]
+scale = Vector2(30, 30)
+script = ExtResource("1_upeg3")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=731903559]
+color = Color(0.58431375, 0.3019608, 0, 1)
+polygon = PackedVector2Array(1, 0, 0.866, 0.5, 0.5, 0.866, 0, 1, -0.5, 0.866, -0.866, 0.5, -1, 0, -0.866, -0.5, -0.5, -0.866, 0, -1, 0.5, -0.866, 0.866, -0.5)
+uv = PackedVector2Array(34.5, -29.5, 141.96497, -84.21802, 12.164978, -94.668015, -70.33502, -65.51802, -74.735016, -20.418015, -12.035004, 9.281982, 124.36499, 9.831985, 149.66498, 2.6819763, 178.26501, -71.568016, 151.315, -110.61802)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=135738154]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=189837641]
+polygon = PackedVector2Array(1, 0, 0.866, 0.5, 0.5, 0.866, 0, 1, -0.5, 0.866, -0.866, 0.5, -1, 0, -0.866, -0.5, -0.5, -0.866, 0, -1, 0.5, -0.866, 0.866, -0.5)

@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://dpdqvqohm8y4b"]
 
-[ext_resource type="Script" uid="uid://bw0uxwutl04oa" path="res://Scripts/EntityView.cs" id="1_rnyw1"]
-[ext_resource type="PackedScene" uid="uid://b875chdxf3js5" path="res://Scenes/PathLine.tscn" id="2_4n0f1"]
+[ext_resource type="Script" uid="uid://bw0uxwutl04oa" path="res://Scripts/EntityView.cs" id="1_0s7gp"]
+[ext_resource type="PackedScene" uid="uid://b875chdxf3js5" path="res://PathLine.tscn" id="2_wrwkq"]
 
 [node name="Entity" type="Node2D" unique_id=963323323]
-script = ExtResource("1_rnyw1")
+script = ExtResource("1_0s7gp")
 
-[node name="PathLine" parent="." unique_id=2122776823 instance=ExtResource("2_4n0f1")]
+[node name="PathLine" parent="." unique_id=2122776823 instance=ExtResource("2_wrwkq")]
 points = PackedVector2Array(-5.3999996, -1.8)
 
 [node name="Line2D" type="Line2D" parent="." unique_id=962889043]

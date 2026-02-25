@@ -39,9 +39,9 @@ public partial class Camera : Camera2D
     {
         var fDelta = (float) delta;
 
-        // var moveInput = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        // var translation = moveInput * fDelta * MoveSpeed;
-        // Position += translation;
+        var moveInput = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        var translation = moveInput * fDelta * MoveSpeed;
+        Position += translation;
 
         if(EntityToFollow != null)
         {

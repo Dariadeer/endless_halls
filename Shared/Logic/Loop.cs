@@ -8,10 +8,10 @@ using Shared.Utils;
 
 public class Loop
 {
-    public static readonly long TICK_DURATION_MS = 20;
-    public static readonly double TICK_DURATION_S = 0.02;
+    public static readonly long TICK_DURATION_MS = 25;
+    public static readonly double TICK_DURATION_S = 0.025;
 
-    public int SnapshotInterval = 50;
+    public int SnapshotInterval = 40;
     public int SnapshotQuantity = 6;
     public event Action<World> WorldStateRecovered;
 

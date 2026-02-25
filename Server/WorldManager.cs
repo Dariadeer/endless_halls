@@ -14,7 +14,7 @@ public class WorldManager
     public Queue<ICommand> CommandQueue = [];
     public Dictionary<Connection, Player> Players = [];
     private Loop _loop;
-    public int CommandTickDelay = 5;
+    public int CommandTickDelay = 2;
     private readonly CancellationTokenSource _cts = new();
 
     public WorldManager(World world)

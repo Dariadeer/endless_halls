@@ -12,4 +12,5 @@
 	- [x] Implement message fragmentation for when too much data is to be sent
 	- [ ] Add occasional world state hash checks with a possible re-sync procedure
 - [ ] Magic System
-	- [ ] Create a spell prototype with mana flow through runes
+	- [x] Create a spell prototype with mana flow through runes
+	- [ ] Design proper propagation and activation behaviour

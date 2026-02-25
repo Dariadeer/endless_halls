@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bx7ehrymp80k8"]
+
+[ext_resource type="Script" uid="uid://bhw4lrc0mkamh" path="res://Scripts/RuneView.cs" id="1_1vvhe"]
+
+[node name="Rune" type="Node2D" unique_id=1817646230]
+scale = Vector2(20, 20)
+script = ExtResource("1_1vvhe")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=863873234]
+polygon = PackedVector2Array(1, 0, 0, 1, -1, 0, 0, -1)
+
+[node name="Line2D" type="Line2D" parent="." unique_id=1003499548]
+points = PackedVector2Array(1, 0, 0, 1, -1, 0, 0, -1)
+closed = true
+width = 0.1
+default_color = Color(0, 0, 0, 1)

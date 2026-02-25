@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://c1xhu36ve5b3r"]
+
+[ext_resource type="Script" uid="uid://bhjsf12bd1b4s" path="res://Scripts/RuneLinkView.cs" id="1_eyi42"]
+
+[node name="RuneLink" type="Node2D" unique_id=906155879]
+script = ExtResource("1_eyi42")
+
+[node name="Line2D" type="Line2D" parent="." unique_id=606211403]
+points = PackedVector2Array(0, -1, 0, 1)
+width = 2.5
+default_color = Color(0, 0, 0, 1)

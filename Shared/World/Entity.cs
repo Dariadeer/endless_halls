@@ -31,7 +31,7 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
             if (Movement.State == MovementState.Idle)
             {
                 Movement = new Movement(
-                    tick, tick + 50, to
+                    tick, tick + 40, to
                 );
             }
             else
