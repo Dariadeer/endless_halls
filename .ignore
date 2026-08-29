@@ -1,0 +1,11 @@
+*.old
+*.godot
+*.tscn
+*.uid
+
+# Assets
+*.png
+*.svg
+*.import
+*.jpg
+*.jpeg
