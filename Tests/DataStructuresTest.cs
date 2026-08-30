@@ -11,6 +11,6 @@ public class DataStructuresTest
 
         cmdl.Add(new MoveCommand(0, 0, 0, new Shared.MyMath.Int2(0, 1)));
 
-        Assert.Single(cmdl.GetAll());
+        Assert.Single(cmdl);
     }
 }

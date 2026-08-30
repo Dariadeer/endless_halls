@@ -3,7 +3,7 @@ using Shared.Network;
 
 namespace Shared.Data;
 
-public class Movement : ISerializable<Movement>
+public struct Movement : ISerializable<Movement>
 {
     public static readonly Movement Idle = new();
     public readonly MovementState State = MovementState.Idle;

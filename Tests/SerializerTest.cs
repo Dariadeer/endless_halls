@@ -14,16 +14,12 @@ public class SerializerTest
     {
         var move = new MoveCommand(123, 321, 345, new Int2(412, 5434));
         var stream = new MemoryStream();
-        BinaryWriter writer = new BinaryWriter(
-            stream
-        );
+        BinaryWriter writer = new BinaryWriter(stream);
 
         move.Encode(writer);
         stream.Position = 0;
 
-        BinaryReader reader = new BinaryReader(
-            stream
-        );
+        BinaryReader reader = new BinaryReader(stream);
 
 
         var move2 = MoveCommand.Decode(reader);
@@ -101,7 +97,7 @@ public class SerializerTest
         BinaryReader reader = new(stream);
 
         var player2 = Player.Decode(reader);
-        
+
         Assert.Equal(player.Id, player2.Id);
         Assert.Equal(player.Name, player2.Name);
     }

@@ -8,7 +8,8 @@ public class GameServer
 {
     private readonly TcpListener _listener;
     private readonly CancellationTokenSource _cts = new();
-    private readonly List<Task> _clientTasks = new();
+    private readonly List<Task> _clientTasks = [];
+
 
     public event Action<Connection>? OnConnect;
     public event Action<Connection, byte[]>? OnMessage;
@@ -76,7 +77,8 @@ public class GameServer
         try
         {
             var stream = client.Stream;
-            var buffer = new byte[4096];
+            var buffer = new byte[1024];
+            List<byte> recvBuffer = [];
 
             while (!ct.IsCancellationRequested)
             {
@@ -84,7 +86,18 @@ public class GameServer
                 if (bytesRead == 0)
                     break;
 
-                OnMessage?.Invoke(client, buffer[..bytesRead]);
+                // Append received bytes
+                recvBuffer.AddRange(buffer.AsSpan(0, bytesRead).ToArray());
+
+                // Try to extract as many complete messages as possible
+                while (TryReadMessage(recvBuffer, out var message))
+                {
+                    if (message == null)
+                    {
+                        throw new Exception("The received message cannot be null");
+                    }
+                    OnMessage?.Invoke(client, message);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -100,5 +113,29 @@ public class GameServer
             OnDisconnect?.Invoke(client);
             client.Dispose();
         }
+    }
+
+    private bool TryReadMessage(List<byte> recvBuffer, out byte[]? message)
+    {
+        message = null;
+
+        // Need at least 4 bytes for length
+        if (recvBuffer.Count < 4)
+            return false;
+
+        int length = BitConverter.ToInt32(recvBuffer.ToArray(), 0);
+
+        // Optional sanity check
+        if (length <= 0 || length > 10_000_000)
+            throw new InvalidDataException("Invalid message length");
+
+        // Wait until full payload is available
+        if (recvBuffer.Count < 4 + length)
+            return false;
+
+        message = recvBuffer.GetRange(4, length).ToArray();
+        recvBuffer.RemoveRange(0, 4 + length);
+
+        return true;
     }
 }

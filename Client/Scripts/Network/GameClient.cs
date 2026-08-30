@@ -3,9 +3,7 @@ namespace Client.Scripts.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -108,9 +106,16 @@ public sealed class GameClient : IDisposable
         }
     }
 
-    public ValueTask SendAsync(byte[] data)
-        => _client.GetStream().WriteAsync(data);
+    public ValueTask SendAsync(byte[] payload)
+    {
+        byte[] packet = new byte[4 + payload.Length];
+        BitConverter.GetBytes(payload.Length).CopyTo(packet, 0);
+        payload.CopyTo(packet, 4);
 
+        Console.WriteLine($"{packet.Length} bytes were sent to the client");
+
+        return _client.GetStream().WriteAsync(packet);
+    }
     public void Dispose()
         => _client.Dispose();
 }
