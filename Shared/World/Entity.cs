@@ -26,12 +26,12 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
 
     public void AppendPath(IEnumerable<Int2> tos, int tick)
     {
-        foreach(var to in tos)
+        foreach (var to in tos)
         {
             if (Movement.State == MovementState.Idle)
             {
                 Movement = new Movement(
-                    tick, tick + 40, to
+                    tick, tick + 5, to
                 );
             }
             else
@@ -51,9 +51,9 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
     public void CompleteMovement(int tick)
     {
         Pos = Movement.To;
-        if(Path.Count > 0)
+        if (Path.Count > 0)
         {
-            Movement = new Movement(tick, tick + 50, Path.Dequeue());
+            Movement = new Movement(tick, tick + 5, Path.Dequeue());
         }
         else
         {

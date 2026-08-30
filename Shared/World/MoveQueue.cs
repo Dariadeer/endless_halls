@@ -7,14 +7,12 @@ namespace Shared.Date;
 
 public class MoveQueue : Queue<Int2>, ISerializable<MoveQueue>, ISnapshot<MoveQueue>
 {
-    public MoveQueue() {}
-    public MoveQueue(IEnumerable<Int2> collection) : base(collection) {}
+    public MoveQueue() { }
+    public MoveQueue(IEnumerable<Int2> collection) : base(collection) { }
 
     public void Encode(BinaryWriter writer)
     {
         writer.Write(Count);
-
-        Console.WriteLine($"{Count} move positions to be encoded!");
 
         foreach (var pos in this)
         {
@@ -26,8 +24,7 @@ public class MoveQueue : Queue<Int2>, ISerializable<MoveQueue>, ISnapshot<MoveQu
         var result = new List<Int2>();
 
         int count = reader.ReadInt32();
-        GlobalLogger.Instance.Log($"{count} tiles to be decoded!");
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             result.Add(Int2.Decode(reader));
         }
@@ -40,5 +37,5 @@ public class MoveQueue : Queue<Int2>, ISerializable<MoveQueue>, ISnapshot<MoveQu
         return new MoveQueue(this);
     }
 
-    
+
 }

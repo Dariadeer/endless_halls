@@ -11,10 +11,11 @@ public class Coords
     static float _sin30 = MathF.Sin(MathF.PI / 6);
     static float _sin60 = MathF.Sin(MathF.PI / 3);
     static float _tan60 = MathF.Tan(MathF.PI / 3);
-    public static Vector2 ToHexCenter(Int2 hex) {
+    public static Vector2 ToHexCenter(Int2 hex)
+    {
         return new Vector2(
-            (1 + _sin30) * Globals.TileRadius * hex.X,
-            _sin60 * (hex.X - 2 * hex.Y) * Globals.TileRadius
+            (1 + _sin30) * Globals.TileSizeX * hex.X,
+            _sin60 * (hex.X - 2 * hex.Y) * Globals.TileSizeY
         );
         // return new Vector2(
         //     _sin60 * (hex.Y - 2 * hex.X) * Globals.TileRadius,
@@ -46,6 +47,11 @@ public class Coords
         else
             rz = -rx - ry;
 
-        return new Int2((int) Math.Round(q), (int) Math.Round(r));
+        return new Int2((int)Math.Round(q), (int)Math.Round(r));
+    }
+
+    public Vector2 Int2ToVector2(Int2 pos)
+    {
+        return new Vector2(pos.X, pos.Y);
     }
 }

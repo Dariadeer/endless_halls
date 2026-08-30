@@ -16,7 +16,7 @@ public partial class Camera : Camera2D
     [Export]
     public float MagnifyZoomSpeed { get; set; } = 1;
 
-	[Signal]
+    [Signal]
     public delegate void TileClickedEventHandler(int x, int y);
 
     public int? EntityIdFollowed = null;
@@ -37,13 +37,13 @@ public partial class Camera : Camera2D
     }
     public override void _Process(double delta)
     {
-        var fDelta = (float) delta;
+        var fDelta = (float)delta;
 
         var moveInput = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         var translation = moveInput * fDelta * MoveSpeed;
         Position += translation;
 
-        if(EntityToFollow != null)
+        if (EntityToFollow != null)
         {
             Position = Position.Lerp(EntityToFollow.Position, 0.1f);
         }
@@ -60,13 +60,12 @@ public partial class Camera : Camera2D
             case InputEventMagnifyGesture magnifyGesture:
                 HandleMagnifyEvent(magnifyGesture);
                 break;
-            
-            case InputEventMouseButton mouseEvent:
-                HandleMouseButtonEvent(mouseEvent);
-                break;
-            case InputEventMouseMotion motionEvent:
-                HandleMouseMotionEvent(motionEvent);
-                break;
+                // case InputEventMouseButton mouseEvent:
+                //     HandleMouseButtonEvent(mouseEvent);
+                //     break;
+                // case InputEventMouseMotion motionEvent:
+                //     HandleMouseMotionEvent(motionEvent);
+                //     break;
         }
     }
 
@@ -88,16 +87,16 @@ public partial class Camera : Camera2D
                 zoomDelta += 1;
                 break;
             case MouseButton.Left or MouseButton.Right or MouseButton.Middle:
-                if(mouseEvent.Pressed)
+                if (mouseEvent.Pressed)
                 {
                     _mouseDown = true;
                     _mouseDownLocalPos = mouseEvent.Position;
                     _mouseMoveLocalPos = mouseEvent.Position;
                     _mouseDownGlobalPos = Position;
-                } 
+                }
                 else
                 {
-                    if((_mouseDownLocalPos - _mouseMoveLocalPos).Length() < 15)
+                    if ((_mouseDownLocalPos - _mouseMoveLocalPos).Length() < 15)
                     {
                         Int2 tileHexPos = Coords.ToHexCoords(GetGlobalMousePosition(), 40);
                         EmitSignal(SignalName.TileClicked, [tileHexPos.X, tileHexPos.Y]);
@@ -106,7 +105,6 @@ public partial class Camera : Camera2D
                     _mouseMoved = false;
                 }
                 break;
-                
         }
         var zoom = Mathf.Min(Mathf.Max(Zoom.X * (1 + zoomDelta * ZoomSpeed), 1), 5);
         _targetZoom = zoom;
@@ -114,12 +112,11 @@ public partial class Camera : Camera2D
 
     private void HandleMouseMotionEvent(InputEventMouseMotion motionEvent)
     {
-        if(_mouseDown)
+        if (_mouseDown)
         {
             _mouseMoved = true;
             _mouseMoveLocalPos = motionEvent.Position;
             Position = _mouseDownGlobalPos + (_mouseDownLocalPos - _mouseMoveLocalPos) / Zoom;
         }
     }
-    
 }

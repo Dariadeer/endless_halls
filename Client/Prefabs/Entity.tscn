@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://b875chdxf3js5" path="res://PathLine.tscn" id="2_wrwkq"]
 
 [node name="Entity" type="Node2D" unique_id=963323323]
+position = Vector2(0, -30)
 script = ExtResource("1_0s7gp")
 
 [node name="PathLine" parent="." unique_id=2122776823 instance=ExtResource("2_wrwkq")]

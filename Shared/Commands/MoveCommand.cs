@@ -16,7 +16,7 @@ public class MoveCommand : ICommand, ISerializable<MoveCommand>, IClientMessagea
     public readonly int EntityId;
     public readonly Int2 To;
 
-    public MoveCommand(int id, int tick, int entityId, Int2 to) 
+    public MoveCommand(int id, int tick, int entityId, Int2 to)
     {
         EntityId = entityId;
         Tick = tick;

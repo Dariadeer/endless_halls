@@ -1,9 +1,6 @@
 ﻿using Shared.Data;
-using Shared.Logic;
 using Shared.Data.Commands;
-using Shared.MyMath;
 using Shared.Network;
-using System.Net.Sockets;
 using Shared.Network.Messages;
 using System.Diagnostics;
 
@@ -17,14 +14,14 @@ class Program
     {
         int port = 3000;
 
-        if(args.Length > 0)
+        if (args.Length > 0)
         {
             port = int.Parse(args[0]);
         }
 
         var grid = new TileMap();
         grid.Generate(10);
-        
+
         var world = new World(grid, []);
         worldManager = new WorldManager(world);
 
@@ -48,7 +45,7 @@ class Program
     {
         Debug.Assert(worldManager != null);
 
-        var requestType = (ClientMessageType) bytes[0];
+        var requestType = (ClientMessageType)bytes[0];
 
         switch (requestType)
         {
@@ -88,5 +85,6 @@ class Program
     static async void OnDisconnect(Connection client)
     {
         worldManager?.RemovePlayer(client);
+        Console.WriteLine("Client disconnected");
     }
 }

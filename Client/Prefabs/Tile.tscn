@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://c07pmmxy2gmbk" path="res://Scripts/TileView.cs" id="1_t0yj4"]
 
 [node name="Tile" type="Node2D" unique_id=1736381881]
-scale = Vector2(40, 40)
+scale = Vector2(40, 30)
 script = ExtResource("1_t0yj4")
 
 [node name="TileCollider" type="Area2D" parent="." unique_id=1626222538]

@@ -9,3 +9,5 @@
 *.import
 *.jpg
 *.jpeg
+*.tres
+*.cfg

@@ -2,7 +2,6 @@ namespace Shared.Logic;
 
 using Shared.Data;
 using Shared.Data.Commands;
-using Shared.MyMath;
 using Shared.Network;
 using Shared.Utils;
 
@@ -13,9 +12,9 @@ public class Loop
 
     public int SnapshotInterval = 40;
     public int SnapshotQuantity = 6;
-    public event Action<World> WorldStateRecovered;
+    public event Action<World>? WorldStateRecovered;
 
-	public ILogger? Logger;
+    public ILogger? Logger;
     public World World;
     public int Tick;
     public int FurthestTickProcessed = 0;
@@ -41,12 +40,12 @@ public class Loop
     {
         AdvanceWorld(tick);
 
-        if((tick + 1) % SnapshotInterval == 0)
+        if ((tick + 1) % SnapshotInterval == 0)
         {
             snapshots[tick + 1] = World.Copy();
 
             int snapshotToRemoveTick = tick + 1 - SnapshotQuantity * SnapshotInterval;
-            if(snapshotToRemoveTick != 0)
+            if (snapshotToRemoveTick != 0)
             {
                 snapshots.Remove(snapshotToRemoveTick);
             }
@@ -59,7 +58,7 @@ public class Loop
     {
         Update(Tick);
 
-        if(Tick > FurthestTickProcessed)
+        if (Tick > FurthestTickProcessed)
         {
             FurthestTickProcessed = Tick;
         }
@@ -70,12 +69,13 @@ public class Loop
     }
 
     public void AdvanceWorld(int tick)
-    {   
+    {
         World.Advance(tick);
 
         if (_commands.ContainsKey(tick))
         {
-            foreach(var command in _commands[tick]) {
+            foreach (var command in _commands[tick])
+            {
                 ApplyCommand(command);
             }
         }
@@ -100,31 +100,31 @@ public class Loop
         int tick = command.Tick;
         var recoveryNeeded = false;
         var recoveryRange = (SnapshotQuantity - 1) * SnapshotInterval;
-        if(tick < Tick)
+        if (tick < Tick)
         {
-            if(tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
+            if (tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
             {
                 recoveryNeeded = true;
-            } 
+            }
             else
             {
                 throw new ArgumentException($"Cannot recover state {Tick - tick} ticks behind, maximum is {(SnapshotQuantity - 1) * SnapshotInterval}");
             }
         }
 
-        if(!_commands.ContainsKey(tick))
+        if (!_commands.ContainsKey(tick))
         {
             _commands.Add(tick, []);
         }
         var commandsAtTick = _commands[tick];
         commandsAtTick.Add(command);
-        
-        if(tick > _lastCommandTick)
+
+        if (tick > _lastCommandTick)
         {
             _lastCommandTick = tick;
         }
 
-        if(recoveryNeeded) RecoverState(tick);
+        if (recoveryNeeded) RecoverState(tick);
     }
 
     public void InsertCommands(CommandList commands)
@@ -137,23 +137,23 @@ public class Loop
         foreach (var command in commands)
         {
             int tick = command.Tick;
-            if(tick < leastRecentTick)
+            if (tick < leastRecentTick)
             {
                 leastRecentTick = tick;
             }
-            if(tick < Tick)
+            if (tick < Tick)
             {
-                if(tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
+                if (tick >= FurthestTickProcessed - recoveryRange && tick >= 0)
                 {
                     recoveryNeeded = true;
-                } 
+                }
                 else
                 {
                     throw new ArgumentException($"Cannot recover state {Tick - tick} ticks behind, maximum is {(SnapshotQuantity - 1) * SnapshotInterval}");
                 }
             }
 
-            if(!_commands.ContainsKey(tick))
+            if (!_commands.ContainsKey(tick))
             {
                 _commands.Add(tick, []);
             }
@@ -161,18 +161,17 @@ public class Loop
             commandsAtTick.Add(command);
         }
 
-        if(recoveryNeeded) RecoverState(leastRecentTick);
+        if (recoveryNeeded) RecoverState(leastRecentTick);
     }
 
     public void ApplyCommand(ICommand command)
     {
-        Logger?.Log("Applying " + command + " " + command.Id + " at tick " + Tick);
         Entity? entity;
         switch (command)
         {
             case MoveCommand move:
                 entity = FetchEntity(move.EntityId);
-                if(entity == null) break;
+                if (entity == null) break;
                 var lastPos = entity.Path.LastOrDefault(entity.Movement.State == MovementState.Idle ? entity.Pos : entity.Movement.To);
                 var steps = World.Pathfinder.AStar(lastPos, move.To);
                 entity.AppendPath(steps, Tick);
@@ -184,26 +183,28 @@ public class Loop
                 break;
             case HaltCommand halt:
                 entity = FetchEntity(halt.EntityId);
-                if(entity == null) break;
+                if (entity == null) break;
                 entity.ClearPath();
                 break;
             case DisappearCommand disappear:
                 entity = FetchEntity(disappear.EntityId);
-                if(entity == null) break;
+                if (entity == null) break;
                 World.RemoveEntity(entity);
                 break;
             default:
                 Logger?.Log("Unrecognized command!");
                 break;
         }
+        Logger?.Log("Applied " + command + " " + command.Id + " at tick " + Tick);
     }
 
     public Entity? FetchEntity(int entityId)
     {
-        if(World.Entities.TryGetValue(entityId, out var entity))
+        if (World.Entities.TryGetValue(entityId, out var entity))
         {
             return entity;
-        } else
+        }
+        else
         {
             return null;
         }
@@ -213,9 +214,9 @@ public class Loop
     {
         var snapshotTick = Tick / SnapshotInterval * SnapshotInterval;
         var commands = new CommandList();
-        for(int tick = snapshotTick; tick <= _lastCommandTick; tick++)
+        for (int tick = snapshotTick; tick <= _lastCommandTick; tick++)
         {
-            if(_commands.ContainsKey(tick))
+            if (_commands.ContainsKey(tick))
             {
                 foreach (var command in _commands[tick])
                 {

@@ -29,7 +29,7 @@ public partial class EntityView : Node2D
 
     public override void _Process(double delta)
     {
-        if(_entity.Movement.State == MovementState.Moving)
+        if (_entity.Movement.State == MovementState.Moving)
         {
             Movement movement = _entity.Movement;
             var tileStart = Coords.ToHexCenter(_entity.Pos);
@@ -37,22 +37,22 @@ public partial class EntityView : Node2D
             var timeStart = _context.CalculateTickTime(movement.Start);
             var timeEnd = _context.CalculateTickTime(movement.End);
             var timeNow = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            Position = tileStart.Lerp(tileEnd, Mathf.Min((timeNow - timeStart) / (float) (timeEnd - timeStart), 1f));
-        } 
+            Position = tileStart.Lerp(tileEnd, Mathf.Min((timeNow - timeStart) / (float)(timeEnd - timeStart), 1f));
+        }
         else
         {
             Position = Coords.ToHexCenter(_entity.Pos);
         }
 
-        lock(_pathLine)
+        lock (_pathLine)
         {
-            if(_pathLine.Points.Length != 0)
+            if (_pathLine.Points.Length != 0)
             {
                 _pathLine.SetPointPosition(0, Position);
             }
             _pathLine.GlobalPosition = Vector2.Zero;
         }
-        
+
     }
 
     public void OnPathUpdated()
@@ -61,7 +61,7 @@ public partial class EntityView : Node2D
         {
             _pathLine.ClearPoints();
 
-            if(_entity.Movement.State == MovementState.Idle) return;
+            if (_entity.Movement.State == MovementState.Idle) return;
 
             _pathLine.AddPoint(Coords.ToHexCenter(_entity.Pos));
             _pathLine.AddPoint(Coords.ToHexCenter(_entity.Movement.To));

@@ -19,7 +19,7 @@ public sealed class Connection : IDisposable
         BitConverter.GetBytes(payload.Length).CopyTo(packet, 0);
         payload.CopyTo(packet, 4);
 
-        Console.WriteLine($"{packet.Length} bytes were sent to the client");
+        // Console.WriteLine($"{packet.Length} bytes were sent to the client");
 
         await Stream.WriteAsync(packet);
     }
