@@ -13,15 +13,17 @@ public sealed class Connection : IDisposable
         Stream = client.GetStream();
     }
 
-    public async ValueTask SendAsync(byte[] payload)
+    public ValueTask SendAsync(byte[] payload)
     {
+        // Artificial server delay
+        // await Task.Delay(200);
         byte[] packet = new byte[4 + payload.Length];
         BitConverter.GetBytes(payload.Length).CopyTo(packet, 0);
         payload.CopyTo(packet, 4);
 
         // Console.WriteLine($"{packet.Length} bytes were sent to the client");
 
-        await Stream.WriteAsync(packet);
+        return Stream.WriteAsync(packet);
     }
 
     public void Dispose()

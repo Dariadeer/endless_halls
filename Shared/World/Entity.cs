@@ -8,7 +8,7 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
 {
     public readonly int Id;
     public int TeamId;
-    public Int2 Pos;
+    public int2 Pos;
     public Movement Movement = Movement.Idle;
     public MoveQueue Path = new();
     public Action? PathUpdated;
@@ -19,19 +19,19 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
         Id = id;
     }
 
-    public void AppendMove(Int2 to)
+    public void AppendMove(int2 to)
     {
         Path.Enqueue(to);
     }
 
-    public void AppendPath(IEnumerable<Int2> tos, int tick)
+    public void AppendPath(IEnumerable<int2> tos, int tick)
     {
         foreach (var to in tos)
         {
             if (Movement.State == MovementState.Idle)
             {
                 Movement = new Movement(
-                    tick, tick + 5, to
+                    tick, tick + 30, to
                 );
             }
             else
@@ -53,7 +53,7 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
         Pos = Movement.To;
         if (Path.Count > 0)
         {
-            Movement = new Movement(tick, tick + 5, Path.Dequeue());
+            Movement = new Movement(tick, tick + 30, Path.Dequeue());
         }
         else
         {
@@ -87,7 +87,7 @@ public class Entity : ISnapshot<Entity>, ISerializable<Entity>
         return new Entity(reader.ReadInt32())
         {
             TeamId = reader.ReadInt32(),
-            Pos = Int2.Decode(reader),
+            Pos = int2.Decode(reader),
             Movement = Movement.Decode(reader),
             Path = MoveQueue.Decode(reader)
         };

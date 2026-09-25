@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
-using Server.Utils;
 using Shared.Data;
 using Shared.Data.Commands;
 using Shared.Logic;
+using Shared.MyMath;
 using Shared.Network;
 using Shared.Network.Messages;
 
@@ -10,8 +10,8 @@ namespace Server;
 
 public class WorldManager
 {
-    private int _randomCounter;
     private int _nextCommandId = 0;
+    private int _nextEntityId = 0;
     public ConcurrentQueue<ICommand> CommandQueue = [];
     public Dictionary<Connection, Player> Players = [];
     private Loop _loop;
@@ -22,7 +22,6 @@ public class WorldManager
     {
         _loop = new Loop(world)
         {
-            Logger = new ServerLogger(),
             SnapshotQuantity = 2
         };
     }
@@ -30,6 +29,11 @@ public class WorldManager
     private int NextCommandId
     {
         get => _nextCommandId++;
+    }
+
+    private int NextEntityId
+    {
+        get => _nextEntityId++;
     }
 
     public async Task StartLoop()
@@ -71,7 +75,7 @@ public class WorldManager
                     _ = connection.SendAsync(ServerMessage<MoveCommand>.Generate(move));
                     break;
                 case AppearCommand appear:
-                    if (Players[connection].Id != appear.Id)
+                    if (Players[connection].Id != appear.Entity.TeamId)
                     {
                         _ = connection.SendAsync(ServerMessage<AppearCommand>.Generate(appear));
                     }
@@ -91,17 +95,18 @@ public class WorldManager
         return _loop.GetWorldData();
     }
 
-    public void AddPlayer(Connection connection, Player player)
+    public Task AddPlayer(Connection connection, Player player)
     {
         Players[connection] = player;
-        var playerEntity = new Entity(_randomCounter++)
+        var playerEntity = new Entity(NextEntityId)
         {
             Pos = new(0, 0),
             TeamId = player.Id,
             Movement = new Movement(),
         };
-        var serverSummon = new AppearCommand(NextCommandId, GetDelayedTick(), playerEntity);
+        var serverSummon = new AppearCommand(NextCommandId, GetDelayedTick(), playerEntity, int2.Zero);
         CommandQueue.Enqueue(serverSummon);
+        return WaitForCommandDeque(serverSummon);
     }
 
     public void RemovePlayer(Connection connection)
@@ -137,6 +142,14 @@ public class WorldManager
     private int GetDelayedTick()
     {
         return _loop.Tick + CommandTickDelay;
+    }
+
+    private async Task WaitForCommandDeque(ICommand command)
+    {
+        while (CommandQueue.Contains(command))
+        {
+            // Wait for the command to be dequed into the loop
+        }
     }
 
 }

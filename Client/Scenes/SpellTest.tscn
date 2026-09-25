@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://byp2b63okg8gn"]
 
-[ext_resource type="Script" uid="uid://byjk7aee8kc2q" path="res://Scripts/SpellView.cs" id="1_imo3b"]
+[ext_resource type="Script" uid="uid://byjk7aee8kc2q" path="res://Source/SpellView.cs" id="1_imo3b"]
 [ext_resource type="PackedScene" uid="uid://cb8ig4mjex1cp" path="res://Prefabs/RuneSlot.tscn" id="2_8oj7t"]
 [ext_resource type="PackedScene" uid="uid://bx7ehrymp80k8" path="res://Prefabs/Rune.tscn" id="3_hcb7o"]
-[ext_resource type="Script" uid="uid://db827q03ev6oj" path="res://Scripts/Camera.cs" id="4_468s5"]
+[ext_resource type="Script" uid="uid://db827q03ev6oj" path="res://Source/Camera.cs" id="4_468s5"]
 [ext_resource type="PackedScene" uid="uid://c1xhu36ve5b3r" path="res://Prefabs/RuneLink.tscn" id="4_udwvs"]
 
 [node name="SpellTest" type="Node2D" unique_id=1073278267]

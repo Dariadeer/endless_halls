@@ -1,4 +1,5 @@
 using Shared.Network;
+using Shared.Utils;
 
 namespace Shared.Data;
 
@@ -11,7 +12,7 @@ public class EntityMap : Dictionary<int, Entity>, ISnapshot<EntityMap>, ISeriali
     public EntityMap Copy()
     {
         var clone = new EntityMap();
-        
+
         foreach (var entity in Values)
         {
             clone[entity.Id] = entity.Copy();
@@ -23,7 +24,7 @@ public class EntityMap : Dictionary<int, Entity>, ISnapshot<EntityMap>, ISeriali
     public void Encode(BinaryWriter writer)
     {
         writer.Write(Count);
-        
+
         foreach (var entity in Values)
         {
             entity.Encode(writer);
@@ -33,6 +34,7 @@ public class EntityMap : Dictionary<int, Entity>, ISnapshot<EntityMap>, ISeriali
     public static EntityMap Decode(BinaryReader reader)
     {
         int count = reader.ReadInt32();
+        GlobalLogger.Instance.Log(count); ;
 
         var map = new EntityMap();
 

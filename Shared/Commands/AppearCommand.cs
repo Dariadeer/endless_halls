@@ -1,5 +1,4 @@
 using Shared.Network;
-using Shared.Data;
 using Shared.MyMath;
 using Shared.Network.Messages;
 
@@ -13,13 +12,14 @@ public class AppearCommand : ICommand, ISerializable<AppearCommand>, IServerMess
     public static ServerMessageType MessageType => ServerMessageType.Appearance;
 
     public readonly Entity Entity;
-    public readonly Int2 To;
+    public readonly int2 To;
 
-    public AppearCommand(int id, int tick, Entity summonee)
+    public AppearCommand(int id, int tick, Entity summonee, int2 to)
     {
         Id = id;
         Tick = tick;
         Entity = summonee;
+        To = to;
     }
 
     public void Encode(BinaryWriter writer)
@@ -35,7 +35,7 @@ public class AppearCommand : ICommand, ISerializable<AppearCommand>, IServerMess
         return new AppearCommand(
             reader.ReadInt32(),
             reader.ReadInt32(),
-            Entity.Decode(reader)
-        );
+            Entity.Decode(reader),
+            int2.Decode(reader));
     }
 }

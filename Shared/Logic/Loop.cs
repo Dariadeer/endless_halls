@@ -14,7 +14,6 @@ public class Loop
     public int SnapshotQuantity = 6;
     public event Action<World>? WorldStateRecovered;
 
-    public ILogger? Logger;
     public World World;
     public int Tick;
     public int FurthestTickProcessed = 0;
@@ -88,7 +87,7 @@ public class Loop
 
         World = snapshot;
 
-        Logger?.Log($"Recovering from snapshot {currentTick}/{Tick} ({tick})");
+        GlobalLogger.Instance.Log($"Recovering from snapshot {currentTick}/{Tick} ({tick})");
 
         Tick = currentTick;
 
@@ -98,6 +97,7 @@ public class Loop
     public void InsertCommand(ICommand command)
     {
         int tick = command.Tick;
+        GlobalLogger.Instance.Log($"Current tick = {Tick}, command tick = {tick}");
         var recoveryNeeded = false;
         var recoveryRange = (SnapshotQuantity - 1) * SnapshotInterval;
         if (tick < Tick)
@@ -175,7 +175,7 @@ public class Loop
                 var lastPos = entity.Path.LastOrDefault(entity.Movement.State == MovementState.Idle ? entity.Pos : entity.Movement.To);
                 var steps = World.Pathfinder.AStar(lastPos, move.To);
                 entity.AppendPath(steps, Tick);
-                Logger?.Log($"{steps.Count} tiles to travel, {entity.Path.Count} steps in total!");
+                GlobalLogger.Instance.Log($"{steps.Count} tiles to travel, {entity.Path.Count} steps in total!");
                 break;
             case AppearCommand appear:
                 entity = appear.Entity.Copy();
@@ -192,10 +192,10 @@ public class Loop
                 World.RemoveEntity(entity);
                 break;
             default:
-                Logger?.Log("Unrecognized command!");
+                GlobalLogger.Instance.Log("Unrecognized command!");
                 break;
         }
-        Logger?.Log("Applied " + command + " " + command.Id + " at tick " + Tick);
+        GlobalLogger.Instance.Log("Applied " + command + " " + command.Id + " at tick " + Tick);
     }
 
     public Entity? FetchEntity(int entityId)

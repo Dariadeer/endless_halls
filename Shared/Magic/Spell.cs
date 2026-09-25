@@ -5,10 +5,17 @@ namespace Shared.Magic;
 
 public class Spell
 {
-    public readonly Dictionary<Int2, Rune> Runes = [];
-    static readonly Int2[] NeighborOffsets = [Int2.Right, Int2.Down, new Int2(-1, -1), Int2.Left, Int2.Up, new Int2(1, 1)];
-    public readonly LinkedList<Rune> RuneCache = [];
-    public readonly LinkedList<RuneLink> LinkCache = [];
+    static readonly int2[] NeighborOffsets = [int2.Right, int2.Down, new int2(-1, -1), int2.Left, int2.Up, new int2(1, 1)];
+
+    public readonly Dictionary<int2, Rune> Runes = [];
+    public readonly Dictionary<(int2, int2), RuneLink> Links = [];
+
+    private Dictionary<Rune, Mana> _initialTickMana = [];
+    private List<int2> _isolationLayer = [];
+    private SpellMode mode = SpellMode.Activation;
+
+    // Spell area
+    // Spell focus
 
     public int Size = 0;
 
@@ -17,140 +24,209 @@ public class Spell
         Size = size;
     }
 
+    public void Update()
+    {
+        if (mode == SpellMode.Activation)
+        {
+            Activate();
+            mode = SpellMode.Propagation;
+        }
+        else
+        {
+            Propagate();
+            mode = SpellMode.Activation;
+        }
+
+        // Activate();
+        // Propagate();
+    }
+
     public void Propagate()
     {
-        foreach(var link in LinkCache)
+        foreach (var link in Links.Values)
         {
-            link.ProcessManaExchange();
+            link.TransferMana(_initialTickMana);
         }
     }
 
     public void Activate()
     {
-        foreach(var rune in RuneCache)
+        foreach (var rune in Runes.Values)
         {
-            switch (rune.Type)
-            {
-                case RuneType.Source:
-                    rune.Mana += 60;
-                    break;
-            }
-
-            if(rune.Mana >= rune.ActivationThreshold && !rune.Activated)
-            {
-                rune.Mana -= rune.ActivationThreshold;
-                rune.Activated = true;
-            }
-            if(rune.Activated)
-            {
-                rune.ManaToShare = rune.Mana / Math.Max(1, rune.OpenLinkCount);
-            }
-
-            
+            rune.Activate();
+            _initialTickMana[rune] = rune.Mana;
         }
     }
 
-    public void Update()
+    public bool AddRune(int2 pos, Rune rune)
     {
-        Activate();
-        Propagate();
-    }
-
-    public bool AddRune(Rune rune)
-    {
-        if(Runes.ContainsKey(rune.Pos)) return false;
-        Runes.Add(rune.Pos, rune);
-        CreateNeighborLinks(rune);
-        UpdateCache();
+        if (Runes.ContainsKey(pos)) return false;
+        Runes.Add(pos, rune);
+        _initialTickMana[rune] = rune.Mana;
+        GlobalLogger.Instance.Log($"Adding rune {rune.Type} at {pos}");
+        UpdateNeighborLinks(pos, rune);
         return true;
     }
 
-    public bool RemoveRune(Int2 pos)
+    public bool RemoveRune(int2 pos)
     {
-        if(Runes.TryGetValue(pos, out var rune))
+        if (Runes.TryGetValue(pos, out var rune))
         {
             Runes.Remove(pos);
-            // Sever neighbor links
-            for(int i = 0; i < 6; i++)
+            for (int i = 0; i < NeighborOffsets.Length; i++)
             {
-                if(rune.Links[i] != null) 
+                int2 offset = NeighborOffsets[i];
+                int2 neighborPos = pos + offset;
+                if (Runes.TryGetValue(neighborPos, out var neighbor))
                 {
-                    rune.Links[i].GetOther(rune).RemoveLink((i + 3) % 6);
-                }
-            }
-            UpdateCache();
-            return true;
-        }
-        return false;
-    }
-
-    public void UpdateCache()
-    {
-        RuneCache.Clear();
-        LinkCache.Clear();
-
-        Rune? rune;
-        RuneLink link;
-        for(int ring = 0; ring < Size; ring++)
-        {
-            foreach (var pos in GetRing(ring))
-            {
-                if(Runes.TryGetValue(pos, out rune))
-                {
-                    RuneCache.AddLast(rune);
-                    
-                    for(int i = 0; i < 6; i++)
+                    if (TryRemoveLink(pos, neighborPos))
                     {
-                        link = rune.Links[i];
-                        if(link == null || LinkCache.Contains(link)) continue;
-                        LinkCache.AddLast(link);
+                        // UpdateNeighborLinks(neighborPos, Runes[neighborPos]);
+                    }
+
+                    if (rune.Type == RuneType.Isolator)
+                    {
+                        int2 offset2 = NeighborOffsets[(i + 1) % 6];
+                        int2 neighborPos2 = pos + offset2;
+
+                        if (Runes.TryGetValue(neighborPos2, out var neighbor2))
+                        {
+                            int2 possibleIsolatorPos = neighborPos + offset2;
+                            if (!Runes.TryGetValue(possibleIsolatorPos, out var isolator) || isolator.Type != RuneType.Isolator)
+                            {
+                                var link = new RuneLink(neighbor, neighbor2, 0.2f);
+                                Links[(neighborPos, neighborPos2)] = link;
+                                GlobalLogger.Instance.Log($"Relinked {neighborPos} and {neighborPos2}");
+                            }
+                        }
                     }
                 }
             }
+            return true;
+        }
+
+        return false;
+    }
+
+    public void ResetRunes()
+    {
+        foreach (var rune in Runes.Values)
+        {
+            rune.Reset();
         }
     }
 
-    public void CreateNeighborLinks(Rune rune)
+    public void UpdateNeighborLinks(int2 pos, Rune rune)
     {
-        var pos = rune.Pos;
-        Rune? neighbor;
-        RuneLink link;
-        Int2 neighborPos;
-        for(int i = 0; i < 6; i++)
+        for (int i = 0; i < NeighborOffsets.Length; i++)
         {
-            neighborPos = pos + NeighborOffsets[i];
-            // GlobalLogger.Instance.Log($"Linking {rune.Pos} and {neighborPos}");
-            if(Runes.TryGetValue(neighborPos, out neighbor))
+            int2 offset = NeighborOffsets[i];
+            int2 neighborPos = pos + offset;
+            // Process linking if a neighbor rune exists
+            if (Runes.TryGetValue(neighborPos, out var neighbor))
             {
-                link = new RuneLink
-                {
-                    Rune1 = rune,
-                    Rune2 = neighbor
-                };
-                rune.AddLink(i, link);
-                neighbor.AddLink((i + 3) % 6, link);
+                var link = new RuneLink(rune, neighbor, 0.2f);
+                Links[(pos, neighborPos)] = link;
+                GlobalLogger.Instance.Log($"Linked {pos} and {neighborPos}");
+            }
+        }
 
-                GlobalLogger.Instance.Log($"Linked {rune.Pos} and {neighbor.Pos}");
+        if (rune.Type == RuneType.Isolator)
+        {
+            ApplyIsolation(pos);
+        }
+
+        TryApplyIsolationAround(pos);
+    }
+
+    public (int2, int2) GetRuneLinkPositions(Rune rune1, Rune rune2)
+    {
+        int2? pos1 = null, pos2 = null;
+        foreach (var (pos, rune) in Runes)
+        {
+            if (rune == rune1)
+            {
+                pos1 = pos;
+            }
+
+            if (rune == rune2)
+            {
+                pos2 = pos;
+            }
+        }
+
+        if (pos1 is int2 p1 && pos2 is int2 p2)
+        {
+            return (p1, p2);
+        }
+        else
+        {
+            throw new Exception("Connection between the runes does not exist.");
+        }
+    }
+
+    public void ApplyIsolation(int2 pos)
+    {
+        GlobalLogger.Instance.Log($"Applying isolation around {pos}");
+        for (int i = 0; i < 6; i++)
+        {
+            int2 pos1 = pos + NeighborOffsets[i];
+            int2 pos2 = pos + NeighborOffsets[(i + 1) % 6];
+
+            if (TryGetRuneLink(pos1, pos2, out var link))
+            {
+                TryRemoveLink(pos1, pos2);
+                GlobalLogger.Instance.Log($"Breaking up {pos1} and {pos2}");
             }
         }
     }
 
-    public IEnumerable<Int2> GetRing(int radius)
+    public void RemoveIsolation(int2 pos)
     {
-        if(radius == 0)
+
+        GlobalLogger.Instance.Log($"Removing isolation around {pos}");
+        for (int i = 0; i < 6; i++)
         {
-            yield return Int2.Zero;
-            yield break;
-        }
-        var current = new Int2(0, radius);
-        for(int side = 0; side < 6; side++)
-        {
-            for(int step = 0; step < radius; step++)
+            int2 pos1 = pos + NeighborOffsets[i];
+            int2 pos2 = pos + NeighborOffsets[(i + 1) % 6];
+
+            if (TryGetRuneLink(pos1, pos2, out var link))
             {
-                yield return current;
-                current += NeighborOffsets[side];
+                TryRemoveLink(pos1, pos2);
+                GlobalLogger.Instance.Log($"Breaking up {pos1} and {pos2}");
             }
         }
+    }
+
+    public void TryApplyIsolationAround(int2 pos)
+    {
+
+        for (int i = 0; i < 6; i++)
+        {
+            int2 neighborPos = pos + NeighborOffsets[i];
+            if (Runes.TryGetValue(neighborPos, out var rune) && rune.Type == RuneType.Isolator)
+            {
+                ApplyIsolation(neighborPos);
+            }
+        }
+    }
+
+    public bool TryGetRuneLink(int2 pos1, int2 pos2, out RuneLink? link)
+    {
+        return Links.TryGetValue((pos1, pos2), out link)
+            || Links.TryGetValue((pos2, pos1), out link);
+    }
+
+    public bool TryRemoveLink(int2 pos1, int2 pos2)
+    {
+        return Links.Remove((pos1, pos2))
+            || Links.Remove((pos2, pos1));
+    }
+
+    public bool AreNeighbors(int2 pos1, int2 pos2)
+    {
+        int2 diff = pos1 - pos2;
+        return MathF.Max(MathF.Abs(diff.X), MathF.Abs(diff.Y)) == 1;
     }
 }
 
@@ -158,4 +234,10 @@ public class NeighborRune
 {
     public required Rune Rune;
     public int BlockedFor = 0;
+}
+
+public enum SpellMode
+{
+    Activation,
+    Propagation
 }

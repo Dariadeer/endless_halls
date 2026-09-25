@@ -14,9 +14,9 @@ public class MoveCommand : ICommand, ISerializable<MoveCommand>, IClientMessagea
     static ServerMessageType IServerMessageable.MessageType => ServerMessageType.Movement;
 
     public readonly int EntityId;
-    public readonly Int2 To;
+    public readonly int2 To;
 
-    public MoveCommand(int id, int tick, int entityId, Int2 to)
+    public MoveCommand(int id, int tick, int entityId, int2 to)
     {
         EntityId = entityId;
         Tick = tick;
@@ -38,7 +38,7 @@ public class MoveCommand : ICommand, ISerializable<MoveCommand>, IClientMessagea
             reader.ReadInt32(),
             reader.ReadInt32(),
             reader.ReadInt32(),
-            Int2.Decode(reader)
+            int2.Decode(reader)
         );
     }
 }

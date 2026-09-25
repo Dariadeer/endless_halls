@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dpdqvqohm8y4b"]
 
-[ext_resource type="Script" uid="uid://bw0uxwutl04oa" path="res://Scripts/EntityView.cs" id="1_0s7gp"]
-[ext_resource type="PackedScene" uid="uid://b875chdxf3js5" path="res://PathLine.tscn" id="2_wrwkq"]
+[ext_resource type="Script" uid="uid://bw0uxwutl04oa" path="res://Source/EntityView.cs" id="1_0s7gp"]
+[ext_resource type="PackedScene" uid="uid://b875chdxf3js5" path="res://Prefabs/PathLine.tscn" id="2_wrwkq"]
 
 [node name="Entity" type="Node2D" unique_id=963323323]
 position = Vector2(0, -30)

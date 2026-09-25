@@ -23,7 +23,7 @@ public class WorldGenerator
         World world = new(grid, []);
 
         var entities = EntityGenerator.Dict(30);
-        
+
         foreach (var entry in entities)
         {
             world.Entities.AddEntity(entry.Value);
@@ -37,10 +37,11 @@ public class EntityGenerator
 {
     public static Entity One(int id)
     {
-        return new Entity(id) {
+        return new Entity(id)
+        {
             TeamId = 0,
-            Pos = new Int2(0, 0),
-            Movement = new Movement(123, 234, new Int2(13, 132))
+            Pos = new int2(0, 0),
+            Movement = new Movement(123, 234, new int2(13, 132))
         };
     }
 
@@ -48,7 +49,7 @@ public class EntityGenerator
     {
         Dictionary<int, Entity> entities = [];
 
-        for(int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
         {
             entities[i] = One(i);
         }

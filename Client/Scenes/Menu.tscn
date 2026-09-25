@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://c2exwwsdogw3w"]
+[gd_scene format=3 uid="uid://c2exwwsdogw3w"]
 
-[ext_resource type="Script" uid="uid://datbewqda1o5b" path="res://Scripts/Menu.cs" id="1_3kf3n"]
+[ext_resource type="Script" uid="uid://datbewqda1o5b" path="res://Source/Menu.cs" id="1_3kf3n"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hjks2"]
 bg_color = Color(0.23392546, 0.23392546, 0.23392543, 1)
@@ -9,13 +9,13 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[node name="Menu" type="Node2D" node_paths=PackedStringArray("LocalWorldButton", "RemoteWorldButton", "IpAddressInput")]
+[node name="Menu" type="Node2D" unique_id=748497109 node_paths=PackedStringArray("LocalWorldButton", "RemoteWorldButton", "IpAddressInput")]
 script = ExtResource("1_3kf3n")
 LocalWorldButton = NodePath("UI/OptionsContainer/ButtonContainer/LocalWorldButton")
 RemoteWorldButton = NodePath("UI/OptionsContainer/ButtonContainer/RemoteWorldButton")
 IpAddressInput = NodePath("UI/OptionsContainer/IPAddressField")
 
-[node name="UI" type="Control" parent="."]
+[node name="UI" type="Control" parent="." unique_id=1995012106]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +25,7 @@ offset_bottom = 648.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Title" type="RichTextLabel" parent="UI"]
+[node name="Title" type="RichTextLabel" parent="UI" unique_id=1394280704]
 clip_contents = false
 layout_mode = 1
 anchors_preset = -1
@@ -46,7 +46,7 @@ autowrap_trim_flags = 0
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OptionsContainer" type="VBoxContainer" parent="UI"]
+[node name="OptionsContainer" type="VBoxContainer" parent="UI" unique_id=1194614724]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -59,21 +59,22 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="ButtonContainer" type="VSplitContainer" parent="UI/OptionsContainer"]
+[node name="ButtonContainer" type="VSplitContainer" parent="UI/OptionsContainer" unique_id=1101932879]
 layout_mode = 2
 size_flags_vertical = 3
+dragging_enabled = false
 
-[node name="LocalWorldButton" type="Button" parent="UI/OptionsContainer/ButtonContainer"]
+[node name="LocalWorldButton" type="Button" parent="UI/OptionsContainer/ButtonContainer" unique_id=728555747]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Local World"
 
-[node name="RemoteWorldButton" type="Button" parent="UI/OptionsContainer/ButtonContainer"]
+[node name="RemoteWorldButton" type="Button" parent="UI/OptionsContainer/ButtonContainer" unique_id=221137171]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Remote World"
 
-[node name="IPAddressField" type="LineEdit" parent="UI/OptionsContainer"]
+[node name="IPAddressField" type="LineEdit" parent="UI/OptionsContainer" unique_id=1314964410]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3433427, 0.6600492, 0.30899292, 1)
 theme_override_colors/font_placeholder_color = Color(0.63826, 0.97, 0.6014, 1)

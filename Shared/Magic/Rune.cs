@@ -1,33 +1,50 @@
-using Shared.MyMath;
-
 namespace Shared.Magic;
 
 public class Rune
 {
-    public required Int2 Pos;
-    public int Mana = 0;
-    public int ActivationThreshold = 0;
-    public bool Activated = false;
-    public RuneType Type = RuneType.Conductor;
-    public RuneLink[] Links = new RuneLink[6];
-    public int OpenLinkCount = 0;
-    public int ManaToShare = 0;
+    public Mana Mana;
+    public float Overflow;
+    public float Capacity;
+    public RuneType Type = RuneType.Conduit;
 
-    public int AddLink(int side, RuneLink link)
+    public Rune(float capacity)
     {
-        Links[side] = link;
-        return ++OpenLinkCount;
+        Capacity = capacity;
+        Mana = new Mana();
     }
 
-    public int RemoveLink(int side)
+    public void ChangeMana(Mana mana)
     {
-        Links[side] = null;
-        return --OpenLinkCount;
+
+        float newAmount = Mana.Total + mana.Total;
+        if (newAmount > Capacity)
+        {
+            Mana.ApplyOverflow(Capacity);
+            Overflow += newAmount - Capacity;
+        }
+        else
+        {
+            Mana = Mana + mana;
+        }
+    }
+
+    public virtual void Activate()
+    {
+
+    }
+
+    public void Reset()
+    {
+        Mana = new Mana();
+        Overflow = 0;
     }
 }
 
 public enum RuneType : byte
 {
     Source = 0,
-    Conductor = 1
+    Conduit = 1,
+    Drain = 2,
+    Isolator = 3,
+    Elemental = 4
 }

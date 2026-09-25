@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bx7ehrymp80k8"]
 
-[ext_resource type="Script" uid="uid://bhw4lrc0mkamh" path="res://Scripts/RuneView.cs" id="1_1vvhe"]
+[ext_resource type="Script" uid="uid://bhw4lrc0mkamh" path="res://Source/RuneView.cs" id="1_1vvhe"]
 
 [node name="Rune" type="Node2D" unique_id=1817646230]
 scale = Vector2(20, 20)

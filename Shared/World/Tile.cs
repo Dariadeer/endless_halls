@@ -2,17 +2,18 @@ using Shared.MyMath;
 using Shared.Network;
 
 namespace Shared.Data;
+
 public class Tile : ISnapshot<Tile>, ISerializable<Tile>
 {
-    public readonly Int2 Pos;
+    public readonly int2 Pos;
     public byte ObstacleId = 0;
 
-    public Tile(Int2 pos)
+    public Tile(int2 pos)
     {
         Pos = pos;
     }
 
-    public Tile(Int2 pos, byte obstacleId)
+    public Tile(int2 pos, byte obstacleId)
     {
         Pos = pos;
         ObstacleId = obstacleId;
@@ -36,6 +37,6 @@ public class Tile : ISnapshot<Tile>, ISerializable<Tile>
 
     public static Tile Decode(BinaryReader reader)
     {
-        return new Tile(Int2.Decode(reader), reader.ReadByte());
+        return new Tile(int2.Decode(reader), reader.ReadByte());
     }
 }

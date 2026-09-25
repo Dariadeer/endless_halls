@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Endless Halls"
 run/main_scene="uid://0donpiwjqs3d"
-config/features=PackedStringArray("4.6", "C#", "Mobile")
+config/features=PackedStringArray("4.7", "C#", "Mobile")
 config/icon="res://icon.svg"
 run/solution_directory=""
 run/default_signal_callback_to_self_name="_on_{signal_name}"

@@ -1,8 +1,8 @@
-- [ ] Basic
+- [x] Basic
 	- [x] Add an ability to chain movements
 	- [x] Add *deterministic* pathfinding
 	- [x] Add movement lines
-	- [ ] Reimplement grid view using Godot's tile map scene
+	- [ ] ! Reimplement grid view using Godot's tile map scene
 		- [ ] Find/create a suitable tile set
 - [ ] Netcode
 	- [x] Add disconnect events
@@ -11,6 +11,12 @@
 	- [x] Implement move queue serialisation
 	- [x] Implement message fragmentation for when too much data is to be sent
 	- [ ] Add occasional world state hash checks with a possible re-sync procedure
+	- [ ] Hide other player's movements (enemies only?)
+	- [ ] ! Make map generated/loaded in chunks
+	- [ ] ! Implement vision/darkness
+	- [ ] ! Implement chunk-based WFC dungeon generation
 - [ ] Magic System
 	- [x] Create a spell prototype with mana flow through runes
-	- [ ] Design proper propagation and activation behaviour
+	- [x] Design proper propagation and activation behaviour
+	- [ ] Come up with a way in-spell mana can be translated into game world effects
+	- [ ] Design variety of spell parameters to create different abilities

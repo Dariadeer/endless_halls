@@ -14,9 +14,9 @@ class Program
     {
         int port = 3000;
 
-        if (args.Length > 0)
+        if (args.Length > 1 && args[0].Equals("--port"))
         {
-            port = int.Parse(args[0]);
+            port = int.Parse(args[1]);
         }
 
         var grid = new TileMap();
@@ -33,7 +33,7 @@ class Program
         server.OnDisconnect += OnDisconnect;
         server.OnMessage += OnMessage;
         var serverTask = server.StartAsync();
-        Console.WriteLine("Server started and listening on port 3000");
+        Console.WriteLine($"Server started and listening on port {port}");
 
         var wmTask = worldManager.StartLoop();
         Console.WriteLine("A new world is now being processed!");
@@ -41,7 +41,7 @@ class Program
         await serverTask;
     }
 
-    static async void OnMessage(Connection client, byte[] bytes)
+    static async void OnMessage(Connection connection, byte[] bytes)
     {
         Debug.Assert(worldManager != null);
 
@@ -54,24 +54,26 @@ class Program
 
                 int playerId = nextId++;
                 var player = new Player(playerId, loginReq.Content.Name);
-                worldManager.AddPlayer(client, player);
-                _ = client.SendAsync(ServerMessage<Player>.Generate(player));
+                await worldManager.AddPlayer(connection, player);
+                await connection.SendAsync(ServerMessage<Player>.Generate(player));
+                Console.WriteLine($"Welcome, player {player.Name} ({player.Id})");
                 break;
             case ClientMessageType.WorldData:
-                _ = client.SendAsync(ServerMessage<WorldStateResponse>.Generate(worldManager.GetWorldData()));
+                _ = connection.SendAsync(ServerMessage<WorldStateResponse>.Generate(worldManager.GetWorldData()));
+                Console.WriteLine("Sent world data!");
                 break;
             case ClientMessageType.Move:
                 var moveIntent = new ClientMessage<MoveCommand>(bytes).Content;
-                worldManager?.ProcessMovement(client, moveIntent);
+                worldManager?.ProcessMovement(connection, moveIntent);
                 break;
             case ClientMessageType.Halt:
                 var halt = new ClientMessage<HaltCommand>(bytes).Content;
-                worldManager.ProcessHalt(client, halt);
+                worldManager.ProcessHalt(connection, halt);
                 break;
             case ClientMessageType.Ping:
                 var ping = new ClientMessage<ClientPing>(bytes).Content;
                 // Console.WriteLine($"{DateTimeOffset.Now.ToUnixTimeMilliseconds()} - ping {ping.Id} received");
-                _ = client.SendAsync(ServerMessage<ServerPing>.Generate(
+                _ = connection.SendAsync(ServerMessage<ServerPing>.Generate(
                     new ServerPing
                     {
                         Id = ping.Id

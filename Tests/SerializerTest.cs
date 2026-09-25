@@ -12,7 +12,7 @@ public class SerializerTest
     [Fact]
     public void TestMoveCommandSerialization()
     {
-        var move = new MoveCommand(123, 321, 345, new Int2(412, 5434));
+        var move = new MoveCommand(123, 321, 345, new int2(412, 5434));
         var stream = new MemoryStream();
         BinaryWriter writer = new BinaryWriter(stream);
 
@@ -36,7 +36,7 @@ public class SerializerTest
             Movement = new Movement(
                 124, 415, new(31241, 14212)
             )
-        });
+        }, int2.Zero);
         var stream = new MemoryStream();
         BinaryWriter writer = new BinaryWriter(
             stream

@@ -2,39 +2,38 @@ namespace Shared.Magic;
 
 public class RuneLink
 {
-    public Rune Rune1;
-    public Rune Rune2;
-    public int BlockedFor = 0;
-    public bool ManaExchanged = false;
+    public Rune rune1;
+    public Rune rune2;
+    public float Conductivity;
 
-    public void ProcessManaExchange()
+    public float ManaExchanged = 0;
+
+    public RuneLink(Rune rune1, Rune rune2, float conductivity)
     {
-        ManaExchanged = false;
-        BlockedFor = Math.Max(BlockedFor - 1, 0);
-        if(BlockedFor > 0) return;
-        
+        this.rune1 = rune1;
+        this.rune2 = rune2;
+        Conductivity = conductivity;
+    }
 
-        if(Rune1.ManaToShare > 0)
+    public void TransferMana(Dictionary<Rune, Mana> initialTickMana)
+    {
+        float conductivity = Conductivity;
+        if (rune1.Type == RuneType.Conduit && rune2.Type == RuneType.Conduit)
         {
-            Rune2.Mana += Rune1.ManaToShare;
-            Rune1.Mana -= Rune1.ManaToShare;
-            ManaExchanged = true;
+            conductivity *= 2;
+        }
 
-        }
-        
-        if(Rune2.ManaToShare > 0)
-        {
-            Rune1.Mana += Rune2.ManaToShare;
-            Rune2.Mana -= Rune2.ManaToShare;
-            ManaExchanged = true;
-        }
-        
-        BlockedFor++;
+        Mana diff = Mana.Difference(initialTickMana[rune1], initialTickMana[rune2], Conductivity);
+
+        rune1.ChangeMana(-diff);
+        rune2.ChangeMana(diff);
+
+        ManaExchanged = diff.Total;
     }
 
     public Rune GetOther(Rune rune)
     {
-        if(Rune1 == rune) return Rune2;
-        return Rune1;
+        if (rune1 == rune) return rune2;
+        return rune1;
     }
 }

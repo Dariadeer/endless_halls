@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c1xhu36ve5b3r"]
 
-[ext_resource type="Script" uid="uid://bhjsf12bd1b4s" path="res://Scripts/RuneLinkView.cs" id="1_eyi42"]
+[ext_resource type="Script" uid="uid://bhjsf12bd1b4s" path="res://Source/RuneLinkView.cs" id="1_eyi42"]
 
 [node name="RuneLink" type="Node2D" unique_id=906155879]
 script = ExtResource("1_eyi42")

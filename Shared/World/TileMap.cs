@@ -2,16 +2,20 @@ using Shared.MyMath;
 using Shared.Network;
 
 namespace Shared.Data;
-public class TileMap : Dictionary<Int2, Tile>, ISnapshot<TileMap>, ISerializable<TileMap>
+
+public class TileMap : Dictionary<int2, Tile>, ISnapshot<TileMap>, ISerializable<TileMap>
 {
-    public void Generate(int radius) 
+    public void Generate(int radius)
     {
         Random rng = new();
-        for(int x = -radius + 1; x < radius; x++) {
-            for(int y = -radius + 1; y < radius; y++) {
-                if((x > 0 && y > 0) || (x < 0 && y < 0) || MathF.Abs(x) + MathF.Abs(y) < radius) {
+        for (int x = -radius + 1; x < radius; x++)
+        {
+            for (int y = -radius + 1; y < radius; y++)
+            {
+                if ((x > 0 && y > 0) || (x < 0 && y < 0) || MathF.Abs(x) + MathF.Abs(y) < radius)
+                {
                     AddTile(
-                        new Tile(new Int2(x, y), (byte) (rng.NextDouble() > 0.67 ? 1 : 0))
+                        new Tile(new int2(x, y), (byte)(rng.NextDouble() > 0.67 ? 1 : 0))
                     );
                 }
             }
@@ -23,7 +27,7 @@ public class TileMap : Dictionary<Int2, Tile>, ISnapshot<TileMap>, ISerializable
         Add(tile.Pos, tile);
     }
 
-    public Tile? GetOrNull(Int2 pos)
+    public Tile? GetOrNull(int2 pos)
     {
         return TryGetValue(pos, out var tile)
             ? tile
@@ -33,7 +37,7 @@ public class TileMap : Dictionary<Int2, Tile>, ISnapshot<TileMap>, ISerializable
     public TileMap Copy()
     {
         var clone = new TileMap();
-        
+
         foreach (var tile in Values)
         {
             clone[tile.Pos] = tile.Copy();
