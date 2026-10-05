@@ -108,8 +108,9 @@ public class TileMap : Dictionary<int2, Tile>, ISnapshot<TileMap>, ISerializable
             {
                 if ((x > 0 && y > 0) || (x < 0 && y < 0) || MathF.Abs(x) + MathF.Abs(y) < radius)
                 {
+                    var pos = new int2(x, y);
                     AddTile(
-                        new Tile(new int2(x, y), (byte)(rng.NextDouble() > 0.67 ? 1 : 0))
+                        new Tile(pos, (byte)(pos.Distance(int2.Zero) > 2 && rng.NextDouble() > 0.67 ? 1 : 0))
                     );
                 }
             }

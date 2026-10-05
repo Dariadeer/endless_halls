@@ -51,13 +51,32 @@ public class TileMapPathfinder
 
     public LinkedList<int2> AStar(int2 From, int2 To)
     {
+        return AStar(From, To, null);
+    }
+
+    public LinkedList<int2> AStar(int2 From, int2 To, IReadOnlySet<int2>? discoveredTiles)
+    {
+        if (!_tileMap.TryGetValue(From, out var startTile)
+            || !_tileMap.TryGetValue(To, out var destinationTile)
+            || !destinationTile.IsWalkable())
+        {
+            return [];
+        }
+
+        if (discoveredTiles is not null
+            && !discoveredTiles.Contains(To)
+            && !NeighbourOffsets.Any(offset => discoveredTiles.Contains(To + offset)))
+        {
+            return [];
+        }
+
         Dictionary<Tile, int> best = [];
         HashSet<Tile> visited = [];
         PriorityQueue<TileGraphNode, int> scheduled = new();
 
         scheduled.Enqueue(new TileGraphNode()
         {
-            Tile = _tileMap[From],
+            Tile = startTile,
             GraphDistance = 0,
             HeuristicDistance = CalculateH(From, To)
         }, CalculateH(From, To));
@@ -76,7 +95,10 @@ public class TileMapPathfinder
             {
                 if (neighbor != null)
                 {
-                    if (neighbor.IsWalkable() && !visited.Contains(neighbor))
+                    bool isAllowed = discoveredTiles is null
+                        || discoveredTiles.Contains(neighbor.Pos)
+                        || neighbor.Pos == To;
+                    if (neighbor.IsWalkable() && isAllowed && !visited.Contains(neighbor))
                     {
                         int g = next.GraphDistance + 1;
                         if (best.TryGetValue(neighbor, out int _g) && g >= _g)

@@ -173,7 +173,10 @@ public class Loop
                 entity = FetchEntity(move.EntityId);
                 if (entity == null) break;
                 var lastPos = entity.Path.LastOrDefault(entity.Movement.State == MovementState.Idle ? entity.Pos : entity.Movement.To);
-                var steps = World.Pathfinder.AStar(lastPos, move.To);
+                var steps = World.Pathfinder.AStar(
+                    lastPos,
+                    move.To,
+                    World.GetExploredTilesForTeam(entity.TeamId));
                 entity.AppendPath(steps, Tick);
                 GlobalLogger.Instance.Log($"{steps.Count} tiles to travel, {entity.Path.Count} steps in total!");
                 break;

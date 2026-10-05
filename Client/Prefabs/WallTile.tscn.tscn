@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://gnyshd81sf6t"]
+
+[ext_resource type="Script" uid="uid://c07pmmxy2gmbk" path="res://Source/TileView.cs" id="1_t0yj4"]
+
+[node name="WallTile" type="Node2D" unique_id=1766555627]
+scale = Vector2(40, 40)
+script = ExtResource("1_t0yj4")
+
+[node name="TileCollider" type="Area2D" parent="." unique_id=1626222538]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="TileCollider" unique_id=1161244028]
+polygon = PackedVector2Array(1, 0, 0.5, 0.866, -0.5, 0.866, -1, 0, -0.5, -0.866, 0.5, -0.866)
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1590673138]
+clip_children = 2
+position = Vector2(-0.024999999, 0)
+color = Color(0.60296476, 0.7415462, 0.761924, 1)
+polygon = PackedVector2Array(1, 0, 0.5, 0.866, -0.5, 0.866, -1, 0, -0.5, -0.866, 0.5, -0.866)
+uv = PackedVector2Array(1, 0, 0.5, 0.866, -0.5, 0.866, -1, 0, -0.5, -0.866, 0.5, -0.866)
+
+[node name="Line2D" type="Line2D" parent="." unique_id=1507144614]
+points = PackedVector2Array(1, 0, 0.5, 0.866, -0.5, 0.866, -1, 0, -0.5, -0.866, 0.5, -0.866)
+closed = true
+width = 0.05
+default_color = Color(0.00011382803, 0.00011382803, 0.00011382803, 1)

@@ -11,7 +11,9 @@ public partial class GridView : Node
     [Export]
     public float TileRadius = 40;
     [Export]
-    public PackedScene TileScene;
+    public PackedScene FloorTileScene;
+    [Export]
+    public PackedScene WallTileScene;
     [Signal]
     public delegate void TileClickedEventHandler(int x, int y);
 
@@ -19,13 +21,14 @@ public partial class GridView : Node
     private GameContext _context;
     private readonly Dictionary<int2, TileView> _tileViews = [];
     private bool _visionInitialized;
-    private bool _hadVisionOrigin;
-    private int2 _lastVisionOrigin;
+    private int _lastVisionRevision = -1;
+    private int _lastVisionTeam;
 
     public void Initialize(GameContext gameContext)
     {
         _context = gameContext;
         _grid = gameContext.World.Grid;
+        _visionInitialized = false;
         CallDeferred("Render");
     }
 
@@ -44,7 +47,8 @@ public partial class GridView : Node
 
         foreach (var tile in _grid.Values)
         {
-            var instance = TileScene.Instantiate<TileView>();
+            var tileScene = tile.IsWalkable() ? FloorTileScene : WallTileScene;
+            var instance = tileScene.Instantiate<TileView>();
             AddChild(instance);
             instance.Position = Coords.ToHexCenter(tile.Pos);
             instance.Name = $"{tile.Pos}";
@@ -70,50 +74,24 @@ public partial class GridView : Node
             return;
         }
 
-        Entity firstEntity = null;
-        foreach (var entity in _context.World.Entities.Values)
-        {
-            firstEntity = entity;
-            break;
-        }
-
-        if (firstEntity is null)
-        {
-            if (_visionInitialized && !_hadVisionOrigin)
-            {
-                return;
-            }
-
-            foreach (var tileView in _tileViews.Values)
-            {
-                tileView.SetVisionVisible(false);
-            }
-
-            _hadVisionOrigin = false;
-            _visionInitialized = true;
-            return;
-        }
-
-        var origin = firstEntity.Pos;
-
-        if (_visionInitialized && _hadVisionOrigin && origin == _lastVisionOrigin)
+        var world = _context.World;
+        int teamId = _context.PlayerTeam;
+        if (_visionInitialized
+            && _lastVisionRevision == world.VisionRevision
+            && _lastVisionTeam == teamId)
         {
             return;
-        }
-
-        var visiblePositions = new HashSet<int2>();
-        foreach (var tile in firstEntity.VisionArea)
-        {
-            visiblePositions.Add(tile.Pos);
         }
 
         foreach (var (pos, tileView) in _tileViews)
         {
-            tileView.SetVisionVisible(visiblePositions.Contains(pos));
+            tileView.SetVisionState(
+                world.IsTileInCurrentVisionForTeam(teamId, pos),
+                world.IsTileExploredByTeam(teamId, pos));
         }
 
-        _lastVisionOrigin = origin;
-        _hadVisionOrigin = true;
+        _lastVisionRevision = world.VisionRevision;
+        _lastVisionTeam = teamId;
         _visionInitialized = true;
     }
 

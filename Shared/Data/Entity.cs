@@ -6,7 +6,23 @@ namespace Shared.Data;
 public class Entity(int id = 0) : ISnapshot<Entity>, ISerializable<Entity>
 {
     public readonly int Id = id;
-    public int TeamId;
+    private int _teamId;
+    public int TeamId
+    {
+        get => _teamId;
+        set
+        {
+            if (_teamId == value)
+            {
+                return;
+            }
+
+            int previousTeamId = _teamId;
+            _teamId = value;
+            TeamChanged?.Invoke(this, previousTeamId);
+        }
+    }
+
     private int2 _pos;
     private TileMap? _grid;
     public int2 Pos
@@ -24,11 +40,24 @@ public class Entity(int id = 0) : ISnapshot<Entity>, ISerializable<Entity>
         }
     }
 
+    private Movement _movement = Movement.Idle;
+    public Movement Movement
+    {
+        get => _movement;
+        set
+        {
+            _movement = value;
+            RecalculateVisionArea();
+        }
+    }
+
+    public int2 VisionOrigin => Movement.State == MovementState.Idle ? Pos : Movement.To;
     public IReadOnlyList<Tile> VisionArea { get; private set; } = Array.Empty<Tile>();
-    public Movement Movement = Movement.Idle;
     public MoveQueue Path = new();
     public Action? PathUpdated;
     public Action? Disappeared;
+    public Action<Entity>? VisionAreaChanged;
+    public Action<Entity, int>? TeamChanged;
 
     public void AttachGrid(TileMap grid)
     {
@@ -40,7 +69,8 @@ public class Entity(int id = 0) : ISnapshot<Entity>, ISerializable<Entity>
     {
         if (_grid is not null)
         {
-            VisionArea = _grid.GetVisionArea(_pos);
+            VisionArea = _grid.GetVisionArea(VisionOrigin);
+            VisionAreaChanged?.Invoke(this);
         }
     }
 

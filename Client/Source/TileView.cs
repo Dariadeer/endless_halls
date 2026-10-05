@@ -7,6 +7,8 @@ public partial class TileView : Node2D
 {
     private Tile _tile;
     private bool _mouseInBounds = false;
+    private bool _isVisibleToTeam;
+    private bool _isExploredByTeam;
 
     [Signal]
     public delegate void ClickedEventHandler(int x, int y);
@@ -19,15 +21,14 @@ public partial class TileView : Node2D
         collider.MouseEntered += OnMouseEntered;
         collider.MouseExited += OnMouseExited;
 
-        if (!_tile.IsWalkable())
-        {
-            GetNode<Polygon2D>("Polygon2D").Color = new Color(0.7f, 0.7f, 0.7f);
-        }
     }
 
-    public void SetVisionVisible(bool isVisible)
+    public void SetVisionState(bool isVisible, bool isExplored)
     {
-        Visible = isVisible;
+        _isVisibleToTeam = isVisible;
+        _isExploredByTeam = isExplored;
+        Visible = isVisible || isExplored;
+        ApplyVisionModulation();
     }
 
     public void OnMouseEntered()
@@ -39,7 +40,16 @@ public partial class TileView : Node2D
     public void OnMouseExited()
     {
         _mouseInBounds = false;
-        Modulate = new Color(1, 1, 1);
+        ApplyVisionModulation();
+    }
+
+    private void ApplyVisionModulation()
+    {
+        Modulate = _isVisibleToTeam
+            ? Colors.White
+            : _isExploredByTeam
+                ? new Color(0.45f, 0.45f, 0.45f)
+                : Colors.White;
     }
 
     public override void _Input(InputEvent @event)

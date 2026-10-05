@@ -3,7 +3,8 @@
 [ext_resource type="Script" uid="uid://breg2dkml4kqv" path="res://Source/LocalWorldView.cs" id="1_j0p05"]
 [ext_resource type="Script" uid="uid://db827q03ev6oj" path="res://Source/Camera.cs" id="2_5nsto"]
 [ext_resource type="Script" uid="uid://nx18dn6epiw1" path="res://Source/GridView.cs" id="2_gjpho"]
-[ext_resource type="PackedScene" uid="uid://d25dy8y5j5od8" path="res://Prefabs/Tile.tscn" id="4_gjpho"]
+[ext_resource type="PackedScene" uid="uid://d25dy8y5j5od8" path="res://Prefabs/FloorTile.tscn" id="4_gjpho"]
+[ext_resource type="PackedScene" uid="uid://gnyshd81sf6t" path="res://Prefabs/WallTile.tscn.tscn" id="7_wall"]
 [ext_resource type="Script" uid="uid://du53aqr3qoapq" path="res://Source/EntityManager.cs" id="5_p70al"]
 [ext_resource type="PackedScene" uid="uid://dpdqvqohm8y4b" path="res://Prefabs/Entity.tscn" id="6_45d1s"]
 
@@ -27,7 +28,8 @@ MagnifyZoomSpeed = 10.0
 
 [node name="Grid" type="Node2D" parent="." unique_id=543420422]
 script = ExtResource("2_gjpho")
-TileScene = ExtResource("4_gjpho")
+FloorTileScene = ExtResource("4_gjpho")
+WallTileScene = ExtResource("7_wall")
 
 [node name="EntityManager" type="Node2D" parent="." unique_id=1925497656]
 script = ExtResource("5_p70al")
