@@ -1,7 +1,7 @@
-using Client.Scripts.Utils.Interfaces;
+using Client.Source.Utils.Interfaces;
 using Godot;
 
-namespace Client.Scripts.Utils;
+namespace Client.Source.Utils;
 
 public static class SceneFactory
 {

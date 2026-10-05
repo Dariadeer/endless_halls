@@ -1,7 +1,7 @@
 using Godot;
 using Shared.Data;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class TileView : Node2D
 {
@@ -21,8 +21,13 @@ public partial class TileView : Node2D
 
         if (!_tile.IsWalkable())
         {
-            GetNode<Polygon2D>("Polygon2D").Color = new Color(0.7f ,0.7f, 0.7f);
+            GetNode<Polygon2D>("Polygon2D").Color = new Color(0.7f, 0.7f, 0.7f);
         }
+    }
+
+    public void SetVisionVisible(bool isVisible)
+    {
+        Visible = isVisible;
     }
 
     public void OnMouseEntered()
@@ -39,7 +44,7 @@ public partial class TileView : Node2D
 
     public override void _Input(InputEvent @event)
     {
-        if(@event is InputEventMouseButton mouseEvent && _mouseInBounds && mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
+        if (@event is InputEventMouseButton mouseEvent && _mouseInBounds && mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
         {
             EmitSignal(SignalName.Clicked, [_tile.Pos.X, _tile.Pos.Y]);
         }

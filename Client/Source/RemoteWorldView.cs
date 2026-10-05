@@ -1,4 +1,4 @@
-namespace Client.Scripts;
+namespace Client.Source;
 
 using System;
 using Godot;
@@ -8,14 +8,14 @@ using Shared.Data.Commands;
 using Shared.MyMath;
 using Shared.Utils;
 using System.Text.RegularExpressions;
-using Client.Scripts.Network;
+using Client.Source.Network;
 using Shared.Network;
 using Shared.Network.Messages;
-using Client.Scripts.Data;
+using Client.Source.Data;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Client.Scripts.Utils.Abstracts;
-using Client.Scripts.Utils.Interfaces;
+using Client.Source.Utils.Abstracts;
+using Client.Source.Utils.Interfaces;
 
 public partial class RemoteWorldView : WorldView, ISceneNode
 {

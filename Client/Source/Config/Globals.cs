@@ -1,4 +1,4 @@
-namespace Client.Scripts.Config;
+namespace Client.Source.Config;
 
 public class Globals
 {

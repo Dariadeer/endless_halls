@@ -1,12 +1,27 @@
 using Shared.Data;
 using Shared.Logic;
 
-namespace Client.Scripts.Data;
+namespace Client.Source.Data;
 
 public class GameContext
 {
+    private static GameContext _instance;
+    public static GameContext Instance
+    {
+        get
+        {
+            if (Instance is null)
+            {
+                _instance = new GameContext();
+            }
+            return _instance;
+        }
+    }
+
     public Camera Camera;
     public World World;
+    public int PlayerTeam;
+
     public int CurrentTick;
     public double LastTickProcessed;
     public long TimeStart;

@@ -1,4 +1,4 @@
-using Client.Scripts.Network;
+using Client.Source.Network;
 using Server;
 using Shared.Data;
 using Shared.Logic;
@@ -6,6 +6,7 @@ using Shared.Network;
 using Tests.Utils;
 
 namespace Tests;
+
 public class NetworkTest
 {
     [Fact]

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Godot;
 using Shared.MyMath;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class RuneSlotView : Node2D
 {

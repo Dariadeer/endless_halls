@@ -1,7 +1,7 @@
-namespace Client.Scripts;
+namespace Client.Source;
 
 using System;
-using Client.Scripts.Config;
+using Client.Source.Config;
 using Godot;
 using Shared.MyMath;
 

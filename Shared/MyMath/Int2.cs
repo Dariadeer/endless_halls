@@ -39,6 +39,16 @@ public readonly struct int2 : IEquatable<int2>, ISerializable<int2>
         return X == other.X && Y == other.Y;
     }
 
+    public int Distance(int2 other)
+    {
+        return
+            Math.Max(
+                Math.Max(
+                    Math.Abs(X - other.X),
+                    Math.Abs(Y - other.Y)),
+                Math.Abs(X - Y - other.X + other.Y));
+    }
+
     public override bool Equals(object? obj)
     {
         return obj is int2 other && Equals(other);

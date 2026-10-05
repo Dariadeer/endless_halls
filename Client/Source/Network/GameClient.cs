@@ -1,4 +1,4 @@
-namespace Client.Scripts.Network;
+namespace Client.Source.Network;
 
 using System;
 using System.Collections.Generic;

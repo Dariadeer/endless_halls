@@ -1,7 +1,7 @@
 using System;
 using Shared.Network;
 
-namespace Client.Scripts.Network;
+namespace Client.Source.Network;
 
 public class PingManager
 {

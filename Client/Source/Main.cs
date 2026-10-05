@@ -1,8 +1,8 @@
 using Godot;
-using Client.Scripts.Utils;
-using Client.Scripts.Utils.Abstracts;
+using Client.Source.Utils;
+using Client.Source.Utils.Abstracts;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class Main : Node2D
 {

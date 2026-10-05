@@ -1,8 +1,8 @@
-using Client.Scripts.Data;
+using Client.Source.Data;
 using Godot;
 using Shared.MyMath;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class Camera : Camera2D
 {

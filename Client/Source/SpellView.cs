@@ -7,7 +7,7 @@ using Shared.Magic.Runes;
 using Shared.MyMath;
 using Shared.Utils;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class SpellView : Node2D
 {
@@ -23,7 +23,7 @@ public partial class SpellView : Node2D
     private Dictionary<string, Node2D> _views;
     private RuneType _nextRuneType = RuneType.Conduit;
 
-    Spell _spell;
+    RuneGrid _spell;
     public override void _Ready()
     {
         GlobalLogger.Instance.SetLogFunction(GD.Print);
@@ -35,7 +35,7 @@ public partial class SpellView : Node2D
             ["links"] = GetNode<Node2D>("Links")
         };
 
-        _spell = new Spell(5);
+        _spell = new RuneGrid(5);
         _spell.AddRune(
             int2.Zero,
             new SourceRune(20, 10)

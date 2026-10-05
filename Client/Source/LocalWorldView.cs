@@ -1,14 +1,14 @@
-namespace Client.Scripts;
+namespace Client.Source;
 
 using System;
-using Client.Scripts.Utils.Abstracts;
-using Client.Scripts.Utils.Interfaces;
+using Client.Source.Utils.Abstracts;
+using Client.Source.Utils.Interfaces;
 using Godot;
 using Shared.Data;
 using Shared.Logic;
 using Shared.Data.Commands;
 using Shared.MyMath;
-using Client.Scripts.Data;
+using Client.Source.Data;
 using System.Threading.Tasks;
 
 public partial class LocalWorldView : WorldView, ISceneNode
@@ -66,7 +66,8 @@ public partial class LocalWorldView : WorldView, ISceneNode
             CurrentTick = _loop.Tick,
             TimeStart = _context != null ? _context.TimeStart : DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             LastTickProcessed = _loop.Tick,
-            Camera = Camera
+            Camera = Camera,
+            PlayerTeam = 0
         };
 
 

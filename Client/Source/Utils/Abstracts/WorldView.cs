@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Godot;
 
-namespace Client.Scripts.Utils.Abstracts;
+namespace Client.Source.Utils.Abstracts;
 
 public abstract partial class WorldView : Node
 {

@@ -1,6 +1,6 @@
 using Godot;
 
-namespace Client.Scripts.Utils.Interfaces;
+namespace Client.Source.Utils.Interfaces;
 
 public interface ISceneNode
 {

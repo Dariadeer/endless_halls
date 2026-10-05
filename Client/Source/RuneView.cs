@@ -2,7 +2,7 @@ using Godot;
 using Shared.Magic;
 using Shared.MyMath;
 
-namespace Client.Scripts;
+namespace Client.Source;
 
 public partial class RuneView : Node2D
 {
