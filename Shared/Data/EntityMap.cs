@@ -1,0 +1,57 @@
+using Shared.Network;
+using Shared.Utils;
+
+namespace Shared.Data;
+
+public class EntityMap : Dictionary<int, Entity>, ISnapshot<EntityMap>, ISerializable<EntityMap>
+{
+    public void AddEntity(Entity entity)
+    {
+        Add(entity.Id, entity);
+    }
+
+    public IEnumerable<Entity> GetAllEntitiesOfTeam(int teamId)
+    {
+        return
+            from entity in Values
+            where entity.TeamId == teamId
+            select entity;
+    }
+
+    public EntityMap Copy()
+    {
+        var clone = new EntityMap();
+
+        foreach (var entity in Values)
+        {
+            clone[entity.Id] = entity.Copy();
+        }
+
+        return clone;
+    }
+
+    public void Encode(BinaryWriter writer)
+    {
+        writer.Write(Count);
+
+        foreach (var entity in Values)
+        {
+            entity.Encode(writer);
+        }
+    }
+
+    public static EntityMap Decode(BinaryReader reader)
+    {
+        int count = reader.ReadInt32();
+        GlobalLogger.Instance.Log(count); ;
+
+        var map = new EntityMap();
+
+        for (int i = 0; i < count; i++)
+        {
+            map.AddEntity(Entity.Decode(reader));
+        }
+
+        return map;
+    }
+}
