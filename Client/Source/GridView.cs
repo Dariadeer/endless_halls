@@ -26,40 +26,58 @@ public partial class GridView : Node
 
     public void Initialize(GameContext gameContext)
     {
+        if (_grid is not null)
+        {
+            _grid.TileAdded -= OnTileAdded;
+        }
+
+        foreach (var child in GetChildren())
+        {
+            child.QueueFree();
+        }
+        _tileViews.Clear();
+
         _context = gameContext;
         _grid = gameContext.World.Grid;
+        _grid.TileAdded += OnTileAdded;
         _visionInitialized = false;
         CallDeferred("Render");
     }
 
     private void Render()
     {
-        // foreach(var child in GetChildren())
-        // {
-        //     child.QueueFree();
-        // }
-
-        if (GetChildCount() > 0)
-        {
-            UpdateVision();
-            return;
-        }
-
         foreach (var tile in _grid.Values)
         {
-            var tileScene = tile.IsWalkable() ? FloorTileScene : WallTileScene;
-            var instance = tileScene.Instantiate<TileView>();
-            AddChild(instance);
-            instance.Position = Coords.ToHexCenter(tile.Pos);
-            instance.Name = $"{tile.Pos}";
-            instance.Initialize(tile);
-            _tileViews[tile.Pos] = instance;
-
-            instance.Clicked += OnTileClicked;
+            RenderTile(tile);
         }
 
         _visionInitialized = false;
         UpdateVision();
+    }
+
+    private void OnTileAdded(Tile tile)
+    {
+        RenderTile(tile);
+        _visionInitialized = false;
+        UpdateVision();
+    }
+
+    private void RenderTile(Tile tile)
+    {
+        if (_tileViews.ContainsKey(tile.Pos))
+        {
+            return;
+        }
+
+        var tileScene = tile.IsWalkable() ? FloorTileScene : WallTileScene;
+        var instance = tileScene.Instantiate<TileView>();
+        AddChild(instance);
+        instance.Position = Coords.ToHexCenter(tile.Pos);
+        instance.Name = $"{tile.Pos}";
+        instance.Initialize(tile);
+        _tileViews[tile.Pos] = instance;
+
+        instance.Clicked += OnTileClicked;
     }
 
     public override void _Process(double delta)

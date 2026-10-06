@@ -65,6 +65,11 @@ public class Entity(int id = 0) : ISnapshot<Entity>, ISerializable<Entity>
         RecalculateVisionArea();
     }
 
+    public void RefreshVisionArea()
+    {
+        RecalculateVisionArea();
+    }
+
     private void RecalculateVisionArea()
     {
         if (_grid is not null)

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 public partial class LocalWorldView : WorldView, ISceneNode
 {
     private Loop _loop;
+    private ChunkMapManager _chunkMapManager;
     [Export]
     public GridView GridView;
     [Export]
@@ -32,8 +33,6 @@ public partial class LocalWorldView : WorldView, ISceneNode
         // SetPhysicsProcess(false);
 
         Shared.Data.TileMap grid = new();
-        grid.Generate(20);
-
         World world = new(grid, []);
 
         _loop = new Loop(world);
@@ -60,6 +59,7 @@ public partial class LocalWorldView : WorldView, ISceneNode
 
     public void Reinitialize(World world)
     {
+        _chunkMapManager = new ChunkMapManager(world, new TileMapGenerator(seed: 1));
         _context = new GameContext
         {
             World = world,
@@ -84,6 +84,7 @@ public partial class LocalWorldView : WorldView, ISceneNode
         while (now > _context.CalculateTickTime(_context.CurrentTick))
         {
             _loop.Update();
+            _chunkMapManager.Update();
             _context.CurrentTick++;
         }
     }

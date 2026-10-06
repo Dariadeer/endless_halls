@@ -5,6 +5,8 @@ namespace Shared.Data;
 
 public class TileMap : Dictionary<int2, Tile>, ISnapshot<TileMap>, ISerializable<TileMap>
 {
+    public event Action<Tile>? TileAdded;
+
     public static int VisionRange = 5;
 
     private static readonly int2[] VisionDirections =
@@ -120,6 +122,7 @@ public class TileMap : Dictionary<int2, Tile>, ISnapshot<TileMap>, ISerializable
     public void AddTile(Tile tile)
     {
         Add(tile.Pos, tile);
+        TileAdded?.Invoke(tile);
     }
 
     public Tile? GetOrNull(int2 pos)

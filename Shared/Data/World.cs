@@ -78,6 +78,7 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
     private void OnEntityVisionAreaChanged(Entity entity)
     {
         RecalculateTeamVision(entity.TeamId);
+        SeedCurrentVisionAt(entity, onlyIfEmpty: true);
     }
 
     private void OnEntityTeamChanged(Entity entity, int previousTeamId)
@@ -87,9 +88,10 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
         SeedCurrentVisionAt(entity);
     }
 
-    private void SeedCurrentVisionAt(Entity entity)
+    private void SeedCurrentVisionAt(Entity entity, bool onlyIfEmpty = false)
     {
         if (_currentVisionTilesByTeam.TryGetValue(entity.TeamId, out var currentVisionTiles)
+            && (!onlyIfEmpty || currentVisionTiles.Count == 0)
             && _visibleTilesByTeam.TryGetValue(entity.TeamId, out var totalVisionTiles)
             && totalVisionTiles.Contains(entity.VisionOrigin)
             && currentVisionTiles.Add(entity.VisionOrigin))
@@ -250,6 +252,14 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
                 }
                 VisionRevision++;
             }
+        }
+    }
+
+    public void RefreshEntityVisionAreas()
+    {
+        foreach (var entity in Entities.Values)
+        {
+            entity.RefreshVisionArea();
         }
     }
 
