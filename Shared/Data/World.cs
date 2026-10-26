@@ -201,15 +201,24 @@ public class World : ISnapshot<World>, ISerializable<World>, IServerMessageable
                     }
 
                     int currentNeighborCount = 0;
+                    int totalNeighborCount = 0;
                     foreach (var direction in VisionDirections)
                     {
                         if (currentVisionTiles.Contains(pos + direction))
                         {
                             currentNeighborCount++;
                         }
+
+                        if (totalVisionTiles.Contains(pos + direction))
+                        {
+                            totalNeighborCount++;
+                        }
                     }
 
-                    if (currentNeighborCount < VisionDirections.Length)
+                    // Peel stale boundary tiles gradually, but don't preserve stale
+                    // holes that are completely enclosed by the new total vision.
+                    if (currentNeighborCount < VisionDirections.Length
+                        || totalNeighborCount == VisionDirections.Length)
                     {
                         toRemove.Add(pos);
                     }
